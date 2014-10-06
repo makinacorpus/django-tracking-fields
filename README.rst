@@ -1,4 +1,4 @@
-===============
+[1;5B]===============
 Activated Mixin
 ===============
 
@@ -16,7 +16,7 @@ Quick start
 
 1. Add "tracking_fields" to your INSTALLED_APPS settings.
 
-2. Add the `tracking_fields.decorators.track` decorator to your models with the fields you want to track as parameters::
+2. Add the ``tracking_fields.decorators.track`` decorator to your models with the fields you want to track as parameters::
 
      @track('test', 'm2m')
      class MyModel(models.Model):
@@ -25,7 +25,7 @@ Quick start
 
 3. Your objects are now tracked. See the admin site for the tracking information.
 
-4. You can run the tests by doing `make test`.
+4. You can run the tests by doing ``make test``.
 
 
 AUTHORS

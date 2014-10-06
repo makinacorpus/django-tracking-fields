@@ -3,9 +3,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
 
-CREATE = 'C'
-UPDATE = 'U'
-DELETE = 'D'
+CREATE = 'CREATE'
+UPDATE = 'UPDATE'
+DELETE = 'DELETE'
+ADD = 'ADD'
+REMOVE = 'REMOVE'
+CLEAR = 'CLEAR'
 
 
 class TrackingEvent(models.Model):
@@ -13,12 +16,15 @@ class TrackingEvent(models.Model):
         (CREATE, _('Create')),
         (UPDATE, _('Update')),
         (DELETE, _('Delete')),
+        (ADD, _('Add')),
+        (REMOVE, _('Remove')),
+        (CLEAR, _('Clear')),
     )
     date = models.DateTimeField(
         _("Date"), auto_now_add=True, editable=False
     )
     action = models.CharField(
-        _('Action'), max_length=1, choices=ACTIONS, editable=False
+        _('Action'), max_length=6, choices=ACTIONS, editable=False
     )
 
     object_content_type = models.ForeignKey(
