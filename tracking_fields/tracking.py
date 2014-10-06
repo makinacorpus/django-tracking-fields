@@ -30,6 +30,9 @@ def _set_original_fields(instance):
 
 
 def _has_changed(instance):
+    """
+    Check if some tracked fields have changed
+    """
     for field, value in instance._original_fields.items():
         if getattr(instance, field) != value:
             return True
@@ -37,6 +40,9 @@ def _has_changed(instance):
 
 
 def _create_event(instance, action):
+    """
+    Create a new event, getting the use if django-cuser is available.
+    """
     user = None
     if CUSER:
         user = CuserMiddleware.get_user()
@@ -50,6 +56,9 @@ def _create_event(instance, action):
 
 
 def _create_tracked_field(event, instance, field):
+    """
+    Create a TrackedFieldModification for the instance.
+    """
     return TrackedFieldModification.objects.create(
         event=event,
         field=field,
@@ -59,6 +68,9 @@ def _create_tracked_field(event, instance, field):
 
 
 def _create_create_tracking_event(instance):
+    """
+    Create a TrackingEvent and TrackedFieldModification for a CREATE event.
+    """
     event = _create_event(instance, CREATE)
     for field in instance._tracked_fields:
         if not isinstance(instance._meta.get_field(field), ManyToManyField):
@@ -66,6 +78,9 @@ def _create_create_tracking_event(instance):
 
 
 def _create_update_tracking_event(instance):
+    """
+    Create a TrackingEvent and TrackedFieldModification for an UPDATE event.
+    """
     event = _create_event(instance, UPDATE)
     for field in instance._tracked_fields:
         if not isinstance(instance._meta.get_field(field), ManyToManyField):
@@ -74,6 +89,9 @@ def _create_update_tracking_event(instance):
 
 
 def _create_delete_tracking_event(instance):
+    """
+    Create a TrackingEvent for a DELETE event.
+    """
     _create_event(instance, DELETE)
 
 

@@ -1,5 +1,5 @@
-[1;5B]===============
-Activated Mixin
+===============
+Tracking Fields
 ===============
 
 .. image:: https://travis-ci.org/makinacorpus/django-tracking-fields.png
@@ -26,6 +26,15 @@ Quick start
 3. Your objects are now tracked. See the admin site for the tracking information.
 
 4. You can run the tests by doing ``make test``.
+
+5. If you want to track who does the changes, please install the ``django-cuser`` app.
+
+FAQ
+===
+
+* Why does my ManyToMany relationship create two events ?
+
+    The admin site actually do a clear then an add for m2m fields (even when they are not modified). Thus, two events are created for each ManyToManyField.
 
 
 AUTHORS

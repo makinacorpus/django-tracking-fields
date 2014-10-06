@@ -23,4 +23,5 @@ class TrackingEventAdmin(admin.ModelAdmin):
         TrackedFieldModificationAdmin,
     )
 
+
 admin.site.register(TrackingEvent, TrackingEventAdmin)

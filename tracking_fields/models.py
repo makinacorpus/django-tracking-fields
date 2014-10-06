@@ -3,9 +3,11 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
 
+# Used for object modifications
 CREATE = 'CREATE'
 UPDATE = 'UPDATE'
 DELETE = 'DELETE'
+# Used for m2m modifications
 ADD = 'ADD'
 REMOVE = 'REMOVE'
 CLEAR = 'CLEAR'
