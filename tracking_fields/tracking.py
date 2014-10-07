@@ -95,6 +95,17 @@ def _create_delete_tracking_event(instance):
     _create_event(instance, DELETE)
 
 
+def _get_m2m_field(model, sender):
+    """
+    Get the field name from a model and a sender from m2m_changed signal.
+    """
+    for field in model._tracked_fields:
+        if isinstance(model._meta.get_field(field), ManyToManyField):
+            if getattr(model, field).through == sender:
+                return field
+    return None
+
+
 def _create_tracked_field_m2m(event, model, instance, sender, objects, action):
     """
     Create the ``TrackedFieldModification`` for a m2m modification.
@@ -110,10 +121,7 @@ def _create_tracked_field_m2m(event, model, instance, sender, objects, action):
     :param objects: The list of objects being added/removed.
     :param action: The action from the m2m_changed signal.
     """
-    for field in model._tracked_fields:
-        if isinstance(instance._meta.get_field(field), ManyToManyField):
-            if getattr(instance, field).through == sender:
-                break
+    field = _get_m2m_field(model, sender)
     before = list(getattr(instance, field).all())
     if action == 'pre_add':
         after = before + objects
@@ -186,6 +194,10 @@ def tracking_m2m(
             # It will actually be a remove of ``instance`` on every
             # tracked object being related
             action = 'pre_remove'
+            # pk_set is None for clear events, we need to get objects' pk.
+            field = _get_m2m_field(model, sender)
+            field = model._meta.get_field(field).related.get_accessor_name()
+            pk_set = set([obj.id for obj in getattr(instance, field).all()])
         # Create an event for each object being tracked
         for pk in pk_set:
             tracked_instance = model.objects.get(pk=pk)

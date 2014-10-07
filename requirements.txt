@@ -1,1 +1,2 @@
+django-cuser
 Django==1.7

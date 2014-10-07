@@ -25,16 +25,17 @@ Quick start
 
 3. Your objects are now tracked. See the admin site for the tracking information.
 
-4. You can run the tests by doing ``make test``.
+4. If you want to track who does the changes, please install the ``django-cuser`` app.
 
-5. If you want to track who does the changes, please install the ``django-cuser`` app.
+5. You can run the tests by doing ``make test`` (make sure to have ``django-cuser`` installed).
+
 
 FAQ
 ===
 
-* Why does my ManyToMany relationship create two events ?
+* Why does my relationship change create two events ?
 
-    The admin site actually do a clear then an add for m2m fields (even when they are not modified). Thus, two events are created for each ManyToManyField.
+  Please see https://docs.djangoproject.com/en/1.7/ref/models/relations/#direct-assignment
 
 
 AUTHORS
