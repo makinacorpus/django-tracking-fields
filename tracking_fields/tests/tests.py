@@ -1,13 +1,13 @@
 import json
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import Client, TestCase
+from django.utils.html import escape
 
 from cuser.middleware import CuserMiddleware
 
 from tracking_fields.models import (
-    TrackingEvent, TrackedFieldModification,
-    CREATE, UPDATE, DELETE, ADD, REMOVE, CLEAR,
+    TrackingEvent, CREATE, UPDATE, DELETE, ADD, REMOVE, CLEAR,
 )
 from tracking_fields.tests.models import Human, Pet
 
@@ -281,4 +281,33 @@ class TrackedFieldModificationTestCase(TestCase):
 
 
 class AdminModelTestCase(TestCase):
-    pass
+    def setUp(self):
+        User.objects.create_superuser('admin', '', 'password')
+        self.c = Client()
+        self.c.login(username="admin", password="password")
+        self.human = Human.objects.create(name="George", age=42, height=175)
+
+    def test_list(self):
+        """ Test the admin view listing all objects. """
+        response = self.c.get('/admin/tracking_fields/trackingevent/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            escape(repr(self.human)),
+            response.content.decode('utf8')
+        )
+
+    def test_single(self):
+        """ Test the admin view listing all objects. """
+        response = self.c.get(
+            '/admin/tracking_fields/trackingevent/{}'.format(self.human.pk),
+            follow=True
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            escape(repr(self.human)),
+            response.content.decode('utf8')
+        )
+        self.assertIn(
+            escape(json.dumps(self.human.name)),
+            response.content.decode('utf8')
+        )

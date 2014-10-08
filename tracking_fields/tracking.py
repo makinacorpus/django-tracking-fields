@@ -109,7 +109,6 @@ def _get_m2m_field(model, sender):
         if isinstance(model._meta.get_field(field), ManyToManyField):
             if getattr(model, field).through == sender:
                 return field
-    return None
 
 
 def _create_tracked_field_m2m(event, model, instance, sender, objects, action):
