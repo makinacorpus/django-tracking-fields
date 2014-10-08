@@ -1,2 +1,3 @@
 django-cuser
+pytz
 Django==1.7
