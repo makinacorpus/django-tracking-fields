@@ -1,6 +1,6 @@
 import json
 
-from django.db.models import ManyToManyField
+from django.db.models import Model, ManyToManyField
 
 try:
     from cuser.middleware import CuserMiddleware
@@ -55,6 +55,12 @@ def _create_event(instance, action):
     )
 
 
+def _serialize_field(field):
+    if isinstance(field, Model):
+        return json.dumps(unicode(field))
+    return json.dumps(field)
+
+
 def _create_tracked_field(event, instance, field):
     """
     Create a TrackedFieldModification for the instance.
@@ -62,8 +68,8 @@ def _create_tracked_field(event, instance, field):
     return TrackedFieldModification.objects.create(
         event=event,
         field=field,
-        old_value=json.dumps(instance._original_fields[field]),
-        new_value=json.dumps(getattr(instance, field))
+        old_value=_serialize_field(instance._original_fields[field]),
+        new_value=_serialize_field(getattr(instance, field))
     )
 
 

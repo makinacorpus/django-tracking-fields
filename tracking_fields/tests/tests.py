@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 
@@ -163,6 +165,14 @@ class TrackingEventTestCase(TestCase):
         self.assertEqual(human_event.user, self.user)
         self.assertEqual(human_event.user_repr, self.user_repr)
 
+    def test_save_with_no_change(self):
+        """
+        Test to save object without change, should not create an UPDATE event
+        """
+        self.human.save()
+        events = TrackingEvent.objects.all()
+        self.assertEqual(events.count(), 2)
+
 
 class TrackedFieldModificationTestCase(TestCase):
     def setUp(self):
@@ -172,35 +182,102 @@ class TrackedFieldModificationTestCase(TestCase):
         self.user_repr = repr(self.user)
         CuserMiddleware.set_user(self.user)
         self.pet = Pet.objects.create(name="Catz", age=12)
+        self.pet2 = Pet.objects.create(name="Catzou", age=1)
         self.human = Human.objects.create(name="George", age=42, height=175)
+        self.human.pets.add(self.pet)
         self.human_repr = repr(self.human)
 
     def test_create(self):
-        pass
+        human_event = TrackingEvent.objects.filter(action=CREATE).last()
+        self.assertEqual(human_event.fields.all().count(), 3)
+        field = human_event.fields.get(field='name')
+        self.assertEqual(field.new_value, json.dumps(self.human.name))
+        field = human_event.fields.get(field='age')
+        self.assertEqual(field.new_value, json.dumps(self.human.age))
+        field = human_event.fields.get(field='favourite_pet')
+        self.assertEqual(field.new_value, json.dumps(self.human.favourite_pet))
 
     def test_update(self):
-        pass
+        self.human.age = 43
+        self.human.save()
+        human_event = TrackingEvent.objects.last()
+        self.assertEqual(human_event.fields.all().count(), 1)
+        field = human_event.fields.get(field='age')
+        self.assertEqual(field.old_value, json.dumps(42))
+        self.assertEqual(field.new_value, json.dumps(43))
 
     def test_foreign_key(self):
-        pass
+        self.human.favourite_pet = self.pet
+        self.human.save()
+        human_event = TrackingEvent.objects.last()
+        self.assertEqual(human_event.fields.all().count(), 1)
+        field = human_event.fields.get(field='favourite_pet')
+        self.assertEqual(field.old_value, json.dumps(None))
+        self.assertEqual(field.new_value, json.dumps(unicode(self.pet)))
 
     def test_add(self):
-        pass
+        self.human.pets.add(self.pet2)
+        human_event = TrackingEvent.objects.last()
+        self.assertEqual(human_event.fields.all().count(), 1)
+        field = human_event.fields.get(field='pets')
+        self.assertEqual(field.old_value, json.dumps([unicode(self.pet)]))
+        self.assertEqual(field.new_value, json.dumps([
+            unicode(self.pet), unicode(self.pet2)
+        ]))
 
     def test_add_reverse(self):
-        pass
+        self.pet2.human_set.add(self.human)
+        human_event = TrackingEvent.objects.last()
+        self.assertEqual(human_event.fields.all().count(), 1)
+        field = human_event.fields.get(field='pets')
+        self.assertEqual(field.old_value, json.dumps([unicode(self.pet)]))
+        self.assertEqual(field.new_value, json.dumps([
+            unicode(self.pet), unicode(self.pet2)
+        ]))
 
     def test_remove(self):
-        pass
+        self.human.pets.add(self.pet2)
+        self.human.pets.remove(self.pet2)
+        human_event = TrackingEvent.objects.last()
+        self.assertEqual(human_event.fields.all().count(), 1)
+        field = human_event.fields.get(field='pets')
+        self.assertEqual(field.old_value, json.dumps([
+            unicode(self.pet), unicode(self.pet2)
+        ]))
+        self.assertEqual(field.new_value, json.dumps([unicode(self.pet)]))
 
     def test_remove_reverse(self):
-        pass
+        self.human.pets.add(self.pet2)
+        self.pet2.human_set.remove(self.human)
+        human_event = TrackingEvent.objects.last()
+        self.assertEqual(human_event.fields.all().count(), 1)
+        field = human_event.fields.get(field='pets')
+        self.assertEqual(field.old_value, json.dumps([
+            unicode(self.pet), unicode(self.pet2)
+        ]))
+        self.assertEqual(field.new_value, json.dumps([unicode(self.pet)]))
 
-    def test_delete(self):
-        pass
+    def test_clear(self):
+        self.human.pets.add(self.pet2)
+        self.human.pets.clear()
+        human_event = TrackingEvent.objects.last()
+        self.assertEqual(human_event.fields.all().count(), 1)
+        field = human_event.fields.get(field='pets')
+        self.assertEqual(field.old_value, json.dumps([
+            unicode(self.pet), unicode(self.pet2)
+        ]))
+        self.assertEqual(field.new_value, json.dumps([]))
 
-    def test_delete_reverse(self):
-        pass
+    def test_clear_reverse(self):
+        self.human.pets.add(self.pet2)
+        self.pet2.human_set.clear()
+        human_event = TrackingEvent.objects.last()
+        self.assertEqual(human_event.fields.all().count(), 1)
+        field = human_event.fields.get(field='pets')
+        self.assertEqual(field.old_value, json.dumps([
+            unicode(self.pet), unicode(self.pet2)
+        ]))
+        self.assertEqual(field.new_value, json.dumps([unicode(self.pet)]))
 
 
 class AdminModelTestCase(TestCase):
