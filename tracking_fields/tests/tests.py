@@ -37,6 +37,25 @@ class TrackingEventTestCase(TestCase):
         self.assertEqual(human_event.user, self.user)
         self.assertEqual(human_event.user_repr, self.user_repr)
 
+    def test_update_without_cuser(self):
+        """
+        Test the CREATE event without the cuser module
+        """
+        from tracking_fields import tracking
+        tracking.CUSER = False
+        self.human.age = 43
+        self.human.save()
+        events = TrackingEvent.objects.all()
+        self.assertEqual(events.count(), 3)
+        human_event = events.last()
+        self.assertIsNotNone(human_event.date)
+        self.assertEqual(human_event.action, UPDATE)
+        self.assertEqual(human_event.object, self.human)
+        self.assertEqual(human_event.object_repr, self.human_repr)
+        self.assertEqual(human_event.user, None)
+        self.assertEqual(human_event.user_repr, 'None')
+        tracking.CUSER = True
+
     def test_update(self):
         """
         Test the UPDATE event
