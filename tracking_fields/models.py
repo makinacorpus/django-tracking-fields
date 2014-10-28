@@ -39,7 +39,7 @@ class TrackingEvent(models.Model):
     object_repr = models.CharField(
         _("Object representation"),
         help_text=_(
-            "Object reprensentation, useful if the object is deleted later."
+            "Object representation, useful if the object is deleted later."
         ),
         max_length=100,
         editable=False
@@ -56,7 +56,7 @@ class TrackingEvent(models.Model):
     user_repr = models.CharField(
         _("User representation"),
         help_text=_(
-            "User reprensentation, useful if the user is deleted later."
+            "User representation, useful if the user is deleted later."
         ),
         max_length=100,
         editable=False
