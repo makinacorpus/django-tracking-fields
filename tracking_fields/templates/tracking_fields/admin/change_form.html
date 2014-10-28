@@ -1,0 +1,12 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+  {% if tracking_opts %}
+  <li>
+    {% url tracking_opts|admin_urlname:'changelist' as tracking_url %}
+    <a href="{{ tracking_url }}?object={{ tracking_value }}" class="historylink">{% trans "Tracking" %}</a>
+  </li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
