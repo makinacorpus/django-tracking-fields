@@ -57,8 +57,8 @@ def _create_event(instance, action):
 
 def _serialize_field(field):
     if isinstance(field, Model):
-        return json.dumps(unicode(field))
-    return json.dumps(field)
+        return json.dumps(unicode(field), ensure_ascii=False).encode('utf8')
+    return json.dumps(field, ensure_ascii=False).encode('utf8')
 
 
 def _create_tracked_field(event, instance, field):
