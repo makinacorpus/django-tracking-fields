@@ -309,24 +309,33 @@ class AdminModelTestCase(TestCase):
     def test_list(self):
         """ Test the admin view listing all objects. """
         response = self.c.get('/admin/tracking_fields/trackingevent/')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
+        self.assertContains(
+            response,
             escape(repr(self.human)),
-            response.content.decode('utf8')
         )
 
     def test_single(self):
         """ Test the admin view listing all objects. """
         response = self.c.get(
-            '/admin/tracking_fields/trackingevent/{}'.format(self.human.pk),
+            '/admin/tracking_fields/trackingevent/1',
             follow=True
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(
+        self.assertContains(
+            response,
             escape(repr(self.human)),
-            response.content.decode('utf8')
         )
-        self.assertIn(
+        self.assertContains(
+            response,
             escape(json.dumps(self.human.name)),
-            response.content.decode('utf8')
+        )
+
+    def test_history_btn(self):
+        """ Test the admin view listing all objects. """
+        response = self.c.get(
+            '/admin/tests/human/{}'.format(self.human.pk),
+            follow=True,
+        )
+        self.assertContains(
+            response,
+            ' class="historylink">Tracking</a>',
         )
