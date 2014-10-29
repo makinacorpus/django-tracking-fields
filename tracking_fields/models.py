@@ -1,6 +1,6 @@
 from django.contrib.contenttypes.generic import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from django.db import models
 
 # Used for object modifications
@@ -14,12 +14,16 @@ CLEAR = 'CLEAR'
 
 
 class TrackingEvent(models.Model):
+    class Meta:
+        verbose_name = _('Tracking event')
+        verbose_name_plural = _('Tracking events')
+
     ACTIONS = (
         (CREATE, _('Create')),
         (UPDATE, _('Update')),
         (DELETE, _('Delete')),
         (ADD, _('Add')),
-        (REMOVE, _('Remove')),
+        (REMOVE, pgettext_lazy('Remove from something', 'Remove')),
         (CLEAR, _('Clear')),
     )
     date = models.DateTimeField(
@@ -64,14 +68,24 @@ class TrackingEvent(models.Model):
 
 
 class TrackedFieldModification(models.Model):
+    class Meta:
+        verbose_name = _('Tracking field modification')
+        verbose_name_plural = _('Tracking field modifications')
+
     event = models.ForeignKey(
         TrackingEvent, verbose_name=_("Event"), related_name='fields',
         editable=False
     )
     field = models.CharField(_("Field"), max_length=40, editable=False)
     old_value = models.TextField(
-        _("Old value"), help_text="JSON serialized", null=True, editable=False
+        _("Old value"),
+        help_text=_("JSON serialized"),
+        null=True,
+        editable=False,
     )
     new_value = models.TextField(
-        _("New value"), help_text="JSON serialized", null=True, editable=False
+        _("New value"),
+        help_text=_("JSON serialized"),
+        null=True,
+        editable=False,
     )

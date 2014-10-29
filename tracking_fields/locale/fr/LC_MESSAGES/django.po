@@ -1,0 +1,115 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-tracking-fields\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-29 10:55+0100\n"
+"PO-Revision-Date: 2014-10-29 10:55+0100\n"
+"Last-Translator: Gagaro <gagaro42@gmail.com>\n"
+"Language-Team: django-tracking-fields <LL@li.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 1.5.4\n"
+
+#: admin.py:37
+msgid "Object"
+msgstr "Objet"
+
+#: models.py:18
+msgid "Tracking event"
+msgstr "Événement de suivi"
+
+#: models.py:19
+msgid "Tracking events"
+msgstr "Événements de suivi"
+
+#: models.py:22
+msgid "Create"
+msgstr "Créer"
+
+#: models.py:23
+msgid "Update"
+msgstr "Modifier"
+
+#: models.py:24
+msgid "Delete"
+msgstr "Supprimer"
+
+#: models.py:25
+msgid "Add"
+msgstr "Ajouter"
+
+#: models.py:26
+#| msgid "Remove"
+msgctxt "Remove from something"
+msgid "Remove"
+msgstr "Enlever"
+
+#: models.py:27
+msgid "Clear"
+msgstr "Tout enlever"
+
+#: models.py:30
+msgid "Date"
+msgstr "Date"
+
+#: models.py:33
+msgid "Action"
+msgstr "Action"
+
+#: models.py:44
+msgid "Object representation"
+msgstr "Représentation de l'objet"
+
+#: models.py:46
+msgid "Object representation, useful if the object is deleted later."
+msgstr "Représentation de l'objet, utile si l'objet est supprimé plus tard."
+
+#: models.py:61
+msgid "User representation"
+msgstr "Représentation de l'utilisateur"
+
+#: models.py:63
+msgid "User representation, useful if the user is deleted later."
+msgstr ""
+"Représentation de l'utilisateur, utile si l'utilisateur est supprimé plus "
+"tard."
+
+#: models.py:72
+msgid "Tracking field modification"
+msgstr "Suivi de modification du champ"
+
+#: models.py:73
+msgid "Tracking field modifications"
+msgstr "Suivi de modification des champs"
+
+#: models.py:76
+msgid "Event"
+msgstr "Événement"
+
+#: models.py:79
+msgid "Field"
+msgstr "Champ"
+
+#: models.py:81
+msgid "Old value"
+msgstr "Ancienne valeur"
+
+#: models.py:82 models.py:88
+msgid "JSON serialized"
+msgstr "JSON sérialisé"
+
+#: models.py:87
+msgid "New value"
+msgstr "Nouvelle valeur"
+
+#: templates/tracking_fields/admin/change_form.html:8
+msgid "Tracking"
+msgstr "Suivi"
