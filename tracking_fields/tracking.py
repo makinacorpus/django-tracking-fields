@@ -23,7 +23,10 @@ def _set_original_fields(instance):
     original_fields = {}
     for field in instance._tracked_fields:
         if not isinstance(instance._meta.get_field(field), ManyToManyField):
-            original_fields[field] = getattr(instance, field)
+            if instance.pk is None:
+                original_fields[field] = None
+            else:
+                original_fields[field] = getattr(instance, field)
     instance._original_fields = original_fields
     # Include pk to detect the creation of an object
     instance._original_fields['pk'] = instance.pk
