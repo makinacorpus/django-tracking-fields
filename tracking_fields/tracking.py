@@ -1,6 +1,8 @@
+import datetime
 import json
 
 from django.db.models import Model, ManyToManyField
+from django.db.models.fields.files import FieldFile
 
 try:
     from cuser.middleware import CuserMiddleware
@@ -59,6 +61,16 @@ def _create_event(instance, action):
 
 
 def _serialize_field(field):
+    if isinstance(field, datetime.datetime):
+        return json.dumps(
+            field.strftime('%Y-%m-%d %H:%M:%S'), ensure_ascii=False
+        ).encode('utf8')
+    if isinstance(field, datetime.date):
+        return json.dumps(
+            field.strftime('%Y-%m-%d'), ensure_ascii=False
+        ).encode('utf8')
+    if isinstance(field, FieldFile):
+        return json.dumps(field.path, ensure_ascii=False).encode('utf8')
     if isinstance(field, Model):
         return json.dumps(unicode(field), ensure_ascii=False).encode('utf8')
     return json.dumps(field, ensure_ascii=False).encode('utf8')
