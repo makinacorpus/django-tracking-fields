@@ -1,6 +1,8 @@
+import datetime
 import json
 
 from django.contrib.auth.models import User
+from django.core.files import File
 from django.test import Client, TestCase
 from django.utils.html import escape
 
@@ -208,7 +210,9 @@ class TrackedFieldModificationTestCase(TestCase):
 
     def test_create(self):
         human_event = TrackingEvent.objects.filter(action=CREATE).last()
-        self.assertEqual(human_event.fields.all().count(), 3)
+        self.assertEqual(human_event.fields.all().count(), 4)
+        field = human_event.fields.get(field='birthday')
+        self.assertEqual(field.new_value, json.dumps(self.human.birthday))
         field = human_event.fields.get(field='name')
         self.assertEqual(field.new_value, json.dumps(self.human.name))
         field = human_event.fields.get(field='age')
@@ -297,6 +301,39 @@ class TrackedFieldModificationTestCase(TestCase):
             unicode(self.pet), unicode(self.pet2)
         ]))
         self.assertEqual(field.new_value, json.dumps([unicode(self.pet)]))
+
+    def test_date(self):
+        today = datetime.date.today()
+        self.human.birthday = today
+        self.human.save()
+        human_event = TrackingEvent.objects.last()
+        field = human_event.fields.get(field='birthday')
+        self.assertEqual(field.old_value, json.dumps(None))
+        self.assertEqual(field.new_value,
+                         json.dumps(today.strftime('%Y-%m-%d')))
+
+    def test_datetime(self):
+        now = datetime.datetime.now()
+        self.pet.vet_appointment = now
+        self.pet.save()
+        pet_event = TrackingEvent.objects.last()
+        field = pet_event.fields.get(field='vet_appointment')
+        self.assertEqual(field.old_value, json.dumps(None))
+        self.assertEqual(field.new_value,
+                         json.dumps(now.strftime('%Y-%m-%d %H:%M:%S')))
+
+    def test_imagefield(self):
+        picture = File(
+            open('tracking_fields/tests/__init__.py'),
+            'picture.png',
+        )
+        self.pet.picture = picture
+        self.pet.save()
+        pet_event = TrackingEvent.objects.last()
+        field = pet_event.fields.get(field='picture')
+        self.assertEqual(field.old_value, json.dumps(None))
+        self.assertEqual(field.new_value, json.dumps(self.pet.picture.path))
+        self.pet.picture.delete()
 
 
 class AdminModelTestCase(TestCase):

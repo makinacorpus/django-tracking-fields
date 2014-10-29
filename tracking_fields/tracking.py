@@ -70,7 +70,11 @@ def _serialize_field(field):
             field.strftime('%Y-%m-%d'), ensure_ascii=False
         ).encode('utf8')
     if isinstance(field, FieldFile):
-        return json.dumps(field.path, ensure_ascii=False).encode('utf8')
+        try:
+            return json.dumps(field.path, ensure_ascii=False).encode('utf8')
+        except ValueError:
+            # No file
+            return json.dumps(None, ensure_ascii=False).encode('utf8')
     if isinstance(field, Model):
         return json.dumps(unicode(field), ensure_ascii=False).encode('utf8')
     return json.dumps(field, ensure_ascii=False).encode('utf8')
