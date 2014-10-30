@@ -53,7 +53,7 @@ def _create_event(instance, action):
     if CUSER:
         user = CuserMiddleware.get_user()
         user_repr = repr(user)
-        if user.is_anonymous():
+        if user is not None and user.is_anonymous():
             user = None
     return TrackingEvent.objects.create(
         action=action,
