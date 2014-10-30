@@ -49,14 +49,18 @@ def _create_event(instance, action):
     Create a new event, getting the use if django-cuser is available.
     """
     user = None
+    user_repr = repr(user)
     if CUSER:
         user = CuserMiddleware.get_user()
+        user_repr = repr(user)
+        if user.is_anonymous():
+            user = None
     return TrackingEvent.objects.create(
         action=action,
         object=instance,
         object_repr=repr(instance),
         user=user,
-        user_repr=repr(user),
+        user_repr=user_repr,
     )
 
 
