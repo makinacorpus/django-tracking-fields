@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 
 from django.db.models import Model, ManyToManyField
 from django.db.models.fields.files import FieldFile
@@ -14,6 +15,8 @@ from tracking_fields.models import (
     TrackingEvent, TrackedFieldModification,
     CREATE, UPDATE, DELETE
 )
+
+logger = logging.getLogger(__name__)
 
 
 # ======================= HELPERS ====================
@@ -81,7 +84,11 @@ def _serialize_field(field):
             return json.dumps(None, ensure_ascii=False).encode('utf8')
     if isinstance(field, Model):
         return json.dumps(unicode(field), ensure_ascii=False).encode('utf8')
-    return json.dumps(field, ensure_ascii=False).encode('utf8')
+    try:
+        return json.dumps(field, ensure_ascii=False).encode('utf8')
+    except TypeError:
+        logger.warning("Could not serialize field {0}".format(repr(field)))
+        return json.dumps(repr(field), ensure_ascii=False).encode('utf8')
 
 
 def _create_tracked_field(event, instance, field):
