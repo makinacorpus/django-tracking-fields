@@ -160,7 +160,7 @@ def _create_update_tracking_related_event(instance):
 
     # Create the events from the events dict
     for related_field, fields in events.items():
-        related_instances = getattr(instance, related_field)
+        related_instances = getattr(instance, related_field[1])
         # FIXME: isinstance(related_instances, RelatedManager ?)
         if hasattr(related_instances, 'all'):
             related_instances = related_instances.all()
@@ -169,7 +169,7 @@ def _create_update_tracking_related_event(instance):
         for related_instance in related_instances:
             event = _create_event(related_instance, UPDATE)
             for field in fields:
-                fieldname = '{0}__{1}'.format(related_field, field)
+                fieldname = '{0}__{1}'.format(related_field[0], field)
                 _create_tracked_field(
                     event, instance, field, fieldname=fieldname
                 )

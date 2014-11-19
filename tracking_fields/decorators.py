@@ -38,20 +38,25 @@ def _track_class_related_field(cls, field):
     related_name = field_obj.related.get_accessor_name()
 
     if not hasattr(related_cls, '_tracked_related_fields'):
-        related_cls._tracked_related_fields = {}
-    if field not in related_cls._tracked_related_fields.keys():
+        setattr(related_cls, '_tracked_related_fields', {})
+    if related_field not in related_cls._tracked_related_fields.keys():
         related_cls._tracked_related_fields[related_field] = []
 
     # There can be several field from different or same model
     # related to a single model.
     # Thus _tracked_related_fields will be of the form:
     # {
-    #     'field name on related model': ['field name on current model',
-    #                                     'field name on another model', ...],
+    #     'field name on related model': [
+    #         ('field name on current model', 'field name to current model'),
+    #         ('field name on another model', 'field name to another model'),
+    #         ...
+    #     ],
     #     ...
     # }
 
-    related_cls._tracked_related_fields[related_field].append(related_name)
+    related_cls._tracked_related_fields[related_field].append(
+        (field, related_name)
+    )
     _add_signals_to_cls(related_cls)
     # Detect m2m fields changes
     if isinstance(related_cls._meta.get_field(related_field), ManyToManyField):
@@ -60,6 +65,7 @@ def _track_class_related_field(cls, field):
             sender=getattr(related_cls, related_field).through,
             dispatch_uid=repr(related_cls),
         )
+
 
 
 def _track_class_field(cls, field):
