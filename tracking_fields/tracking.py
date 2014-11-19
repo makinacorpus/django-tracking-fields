@@ -154,9 +154,10 @@ def _create_update_tracking_related_event(instance):
     events = {}
     # Create a dict mapping related model field to modified fields
     for field, related_fields in instance._tracked_related_fields.items():
-        if instance._original_fields[field] != getattr(instance, field):
-            for related_field in related_fields:
-                events.setdefault(related_field, []).append(field)
+        if not isinstance(instance._meta.get_field(field), ManyToManyField):
+            if instance._original_fields[field] != getattr(instance, field):
+                for related_field in related_fields:
+                    events.setdefault(related_field, []).append(field)
 
     # Create the events from the events dict
     for related_field, fields in events.items():
@@ -190,17 +191,41 @@ def _get_m2m_field(model, sender):
         if isinstance(model._meta.get_field(field), ManyToManyField):
             if getattr(model, field).through == sender:
                 return field
+    for field in model._tracked_related_fields.keys():
+        if isinstance(model._meta.get_field(field), ManyToManyField):
+            if getattr(model, field).through == sender:
+                return field
 
 
-def _create_tracked_field_m2m(event, model, instance, sender, objects, action):
+def _create_tracked_field_m2m(event, instance, field, objects, action,
+                              fieldname=None):
+    fieldname = fieldname or field
+    before = list(getattr(instance, field).all())
+    if action == 'ADD':
+        after = before + objects
+    elif action == 'REMOVE':
+        after = [obj for obj in before if obj not in objects]
+    elif action == 'CLEAR':
+        after = []
+    before = map(unicode, before)
+    after = map(unicode, after)
+    return TrackedFieldModification.objects.create(
+        event=event,
+        field=fieldname,
+        old_value=json.dumps(before),
+        new_value=json.dumps(after)
+    )
+
+
+def _create_tracked_event_m2m(model, instance, sender, objects, action):
     """
-    Create the ``TrackedFieldModification`` for a m2m modification.
+    Create the ``TrackedEvent`` and it's related ``TrackedFieldModification``
+    for a m2m modification.
     The first thing needed is to get the m2m field on the object being tracked.
     The current related objects are then taken (``old_value``).
     The new value is calculated in function of ``action`` (``new_value``).
     The ``TrackedFieldModification`` is created with the proper parameters.
 
-    :param event: The TrackingEvent on which the m2m modification are made.
     :param model: The model of the object being tracked.
     :param instance: The instance of the object being tracked.
     :param sender: The m2m through relationship instance.
@@ -208,21 +233,25 @@ def _create_tracked_field_m2m(event, model, instance, sender, objects, action):
     :param action: The action from the m2m_changed signal.
     """
     field = _get_m2m_field(model, sender)
-    before = list(getattr(instance, field).all())
-    if action == 'pre_add':
-        after = before + objects
-    elif action == 'pre_remove':
-        after = [obj for obj in before if obj not in objects]
-    elif action == 'pre_clear':
-        after = []
-    before = map(unicode, before)
-    after = map(unicode, after)
-    return TrackedFieldModification.objects.create(
-        event=event,
-        field=field,
-        old_value=json.dumps(before),
-        new_value=json.dumps(after)
-    )
+    if field in getattr(model, '_tracked_related_fields', {}).keys():
+        # In case of a m2m tracked on a related model
+        related_fields = model._tracked_related_fields[field]
+        for related_field in related_fields:
+            related_instances = getattr(instance, related_field[1])
+            # FIXME: isinstance(related_instances, RelatedManager ?)
+            if hasattr(related_instances, 'all'):
+                related_instances = related_instances.all()
+            else:
+                related_instances = [related_instances]
+            for related_instance in related_instances:
+                event = _create_event(related_instance, action)
+                fieldname = '{0}_{1}'.format(related_field[0], field)
+                _create_tracked_field_m2m(
+                    event, instance, field, objects, action, fieldname
+                )
+    else:
+        event = _create_event(instance, action)
+        _create_tracked_field_m2m(event, instance, field, objects, action)
 
 
 # ======================= CALLBACKS ====================
@@ -271,14 +300,13 @@ def tracking_m2m(
     ``_create_tracked_field_m2m`` method to extract the proper attribute for
     the TrackedFieldModification.
     """
-    if (action == 'post_add' or action == 'post_remove'
-            or action == 'post_clear'):
-        return
     action_event = {
         'pre_clear': 'CLEAR',
         'pre_add': 'ADD',
         'pre_remove': 'REMOVE',
     }
+    if (action not in action_event.keys()):
+        return
     if reverse:
         if action == 'pre_clear':
             # It will actually be a remove of ``instance`` on every
@@ -291,18 +319,16 @@ def tracking_m2m(
         # Create an event for each object being tracked
         for pk in pk_set:
             tracked_instance = model.objects.get(pk=pk)
-            event = _create_event(tracked_instance, action_event[action])
             objects = [instance]
-            _create_tracked_field_m2m(
-                event, model, tracked_instance, sender, objects, action
+            _create_tracked_event_m2m(
+                model, tracked_instance, sender, objects, action_event[action]
             )
     else:
         # Get the model of the object being tracked
         tracked_model = instance._meta.model
-        event = _create_event(instance, action_event[action])
         objects = []
         if pk_set is not None:
             objects = [model.objects.get(pk=pk) for pk in pk_set]
-        _create_tracked_field_m2m(
-            event, tracked_model, instance, sender, objects, action
+        _create_tracked_event_m2m(
+            tracked_model, instance, sender, objects, action_event[action]
         )

@@ -67,7 +67,6 @@ def _track_class_related_field(cls, field):
         )
 
 
-
 def _track_class_field(cls, field):
     """ Track a field on the current model """
     if '__' in field:
