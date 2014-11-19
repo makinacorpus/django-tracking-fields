@@ -2,6 +2,7 @@ import datetime
 import json
 
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.core.files import File
 from django.test import Client, TestCase
 from django.utils.html import escape
@@ -11,7 +12,7 @@ from cuser.middleware import CuserMiddleware
 from tracking_fields.models import (
     TrackingEvent, CREATE, UPDATE, DELETE, ADD, REMOVE, CLEAR,
 )
-from tracking_fields.tests.models import Human, Pet
+from tracking_fields.tests.models import Human, Pet, House
 
 
 class TrackingEventTestCase(TestCase):
@@ -334,6 +335,39 @@ class TrackedFieldModificationTestCase(TestCase):
         self.assertEqual(field.old_value, json.dumps(None))
         self.assertEqual(field.new_value, json.dumps(self.pet.picture.path))
         self.pet.picture.delete()
+
+
+class TrackingRelatedTestCase(TestCase):
+    def setUp(self):
+        self.human = Human.objects.create(name="Toto", age=42, height=2)
+        self.house = House.objects.create(tenant=self.human)
+        self.content_type = ContentType.objects.get_for_model(House)
+
+    def test_simple_change(self):
+        self.human.name = "Tutu"
+        self.human.save()
+        house_event = TrackingEvent.objects.filter(
+            object_content_type=self.content_type)
+        self.assertEqual(house_event.count(), 1)
+        house_event = house_event.last()
+        self.assertEqual(house_event.fields.count(), 1)
+        field = house_event.fields.last()
+        self.assertEqual(field.old_value, '"Toto"')
+        self.assertEqual(field.new_value, '"Tutu"')
+        self.assertEqual(field.field, 'tenant__name')
+
+    def test_m2m_change(self):
+        pet = Pet.objects.create(name="Pet", age=4)
+        self.human.pets.add(pet)
+        house_event = TrackingEvent.objects.filter(
+            object_content_type=self.content_type)
+        self.assertEqual(house_event.count(), 1)
+        house_event = house_event.last()
+        self.assertEqual(house_event.fields.count(), 1)
+        field = house_event.fields.last()
+        self.assertEqual(field.field, 'tenant__pets')
+        self.assertEqual(field.old_value, json.dumps([]))
+        self.assertEqual(field.new_value, json.dumps([unicode(pet)]))
 
 
 class AdminModelTestCase(TestCase):

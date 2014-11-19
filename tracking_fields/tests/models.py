@@ -34,4 +34,4 @@ class House(models.Model):
     tenant = models.OneToOneField(Human, null=True)
 
     def __unicode__(self):
-        return 'House of {0}'.format(self.human)
+        return 'House of {0}'.format(self.tenant)

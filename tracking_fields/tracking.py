@@ -264,7 +264,7 @@ def _create_tracked_event_m2m(model, instance, sender, objects, action):
                 related_instances = [related_instances]
             for related_instance in related_instances:
                 event = _create_event(related_instance, action)
-                fieldname = '{0}_{1}'.format(related_field[0], field)
+                fieldname = '{0}__{1}'.format(related_field[0], field)
                 _create_tracked_field_m2m(
                     event, instance, field, objects, action, fieldname
                 )
