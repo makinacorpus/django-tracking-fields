@@ -27,8 +27,17 @@ Quick start
 
 4. If you want to track who does the changes, please install the ``django-cuser`` app.
 
-5. You can run the tests by doing ``make test`` (make sure to have ``django-cuser`` installed).
+5. You can also track fields of related objects::
 
+     class MyModel(models.Model):
+         test = models.BooleanField('Test', default=True)
+
+     @track('related__test')
+     class MyOtherModel(models.Model):
+         related = models.ForeignKey(MyModel)
+
+
+6. You can run the tests by doing ``make test`` (make sure to have ``django-cuser`` installed).
 
 FAQ
 ===
