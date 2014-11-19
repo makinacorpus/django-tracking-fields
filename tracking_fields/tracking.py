@@ -26,12 +26,18 @@ def _set_original_fields(instance):
     Save fields value, only for non-m2m fields.
     """
     original_fields = {}
-    for field in instance._tracked_fields:
-        if not isinstance(instance._meta.get_field(field), ManyToManyField):
-            if instance.pk is None:
-                original_fields[field] = None
-            else:
-                original_fields[field] = getattr(instance, field)
+
+    def _set_original_field(instance, field):
+        if instance.pk is None:
+            original_fields[field] = None
+        else:
+            original_fields[field] = getattr(instance, field)
+
+    for field in getattr(instance, '_tracked_fields', []):
+        _set_original_field(instance, field)
+    for field in getattr(instance, '_tracked_related_fields', {}).keys():
+        _set_original_field(instance, field)
+
     instance._original_fields = original_fields
     # Include pk to detect the creation of an object
     instance._original_fields['pk'] = instance.pk
@@ -42,7 +48,19 @@ def _has_changed(instance):
     Check if some tracked fields have changed
     """
     for field, value in instance._original_fields.items():
-        if getattr(instance, field) != value:
+        if field in getattr(instance, '_tracked_fields', []) and \
+           getattr(instance, field) != value:
+            return True
+    return False
+
+
+def _has_changed_related(instance):
+    """
+    Check if some related tracked fields have changed
+    """
+    for field, value in instance._original_fields.items():
+        if field in getattr(instance, '_tracked_related_fields', {}).keys() \
+           and getattr(instance, field) != value:
             return True
     return False
 
@@ -91,13 +109,19 @@ def _serialize_field(field):
         return json.dumps(repr(field), ensure_ascii=False).encode('utf8')
 
 
-def _create_tracked_field(event, instance, field):
+def _create_tracked_field(event, instance, field, fieldname=None):
     """
     Create a TrackedFieldModification for the instance.
+
+    :param event: The TrackingEvent on which to add TrackingField
+    :param instance: The instance on which the field is
+    :param field: The field name to track
+    :param fieldname: The displayed name for the field. Default to field.
     """
+    fieldname = fieldname or field
     return TrackedFieldModification.objects.create(
         event=event,
-        field=field,
+        field=fieldname,
         old_value=_serialize_field(instance._original_fields[field]),
         new_value=_serialize_field(getattr(instance, field))
     )
@@ -109,8 +133,7 @@ def _create_create_tracking_event(instance):
     """
     event = _create_event(instance, CREATE)
     for field in instance._tracked_fields:
-        if not isinstance(instance._meta.get_field(field), ManyToManyField):
-            _create_tracked_field(event, instance, field)
+        _create_tracked_field(event, instance, field)
 
 
 def _create_update_tracking_event(instance):
@@ -119,9 +142,37 @@ def _create_update_tracking_event(instance):
     """
     event = _create_event(instance, UPDATE)
     for field in instance._tracked_fields:
-        if not isinstance(instance._meta.get_field(field), ManyToManyField):
-            if instance._original_fields[field] != getattr(instance, field):
-                _create_tracked_field(event, instance, field)
+        if instance._original_fields[field] != getattr(instance, field):
+            _create_tracked_field(event, instance, field)
+
+
+def _create_update_tracking_related_event(instance):
+    """
+    Create a TrackingEvent and TrackedFieldModification for an UPDATE event
+    for each related model.
+    """
+    events = {}
+    # Create a dict mapping related model field to modified fields
+    for field, related_fields in instance._tracked_related_fields.items():
+        if instance._original_fields[field] != getattr(instance, field):
+            for related_field in related_fields:
+                events.setdefault(related_field, []).append(field)
+
+    # Create the events from the events dict
+    for related_field, fields in events.items():
+        related_instances = getattr(instance, related_field)
+        # FIXME: isinstance(related_instances, RelatedManager ?)
+        if hasattr(related_instances, 'all'):
+            related_instances = related_instances.all()
+        else:
+            related_instances = [related_instances]
+        for related_instance in related_instances:
+            event = _create_event(related_instance, UPDATE)
+            for field in fields:
+                fieldname = '{0}__{1}'.format(related_field, field)
+                _create_tracked_field(
+                    event, instance, field, fieldname=fieldname
+                )
 
 
 def _create_delete_tracking_event(instance):
@@ -164,8 +215,8 @@ def _create_tracked_field_m2m(event, model, instance, sender, objects, action):
         after = [obj for obj in before if obj not in objects]
     elif action == 'pre_clear':
         after = []
-    before = [unicode(obj) for obj in before]
-    after = [unicode(obj) for obj in after]
+    before = map(unicode, before)
+    after = map(unicode, after)
     return TrackedFieldModification.objects.create(
         event=event,
         field=field,
@@ -188,15 +239,19 @@ def tracking_save(sender, instance, raw, using, update_fields, **kwargs):
     Post save, detect creation or changes and log them.
     We need post_save to have the object for a create.
     """
-    if not _has_changed(instance):
-        return
-    if instance._original_fields['pk'] is None:
-        # Create
-        _create_create_tracking_event(instance)
-    else:
-        # Update
-        _create_update_tracking_event(instance)
-    _set_original_fields(instance)
+    if _has_changed(instance):
+        if instance._original_fields['pk'] is None:
+            # Create
+            _create_create_tracking_event(instance)
+        else:
+            # Update
+            _create_update_tracking_event(instance)
+    if _has_changed_related(instance):
+        # Because an object need to be saved before being related,
+        # it can only be an update
+        _create_update_tracking_related_event(instance)
+    if _has_changed(instance) or _has_changed_related(instance):
+        _set_original_fields(instance)
 
 
 def tracking_delete(sender, instance, using, **kwargs):
