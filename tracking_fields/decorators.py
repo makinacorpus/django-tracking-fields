@@ -100,7 +100,6 @@ def _track_class(cls, fields):
     cls._tracked_fields = [
         field for field in fields
         if '__' not in field
-        and not isinstance(cls._meta.get_field(field), ManyToManyField)
     ]
 
 

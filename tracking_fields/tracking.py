@@ -48,9 +48,11 @@ def _has_changed(instance):
     Check if some tracked fields have changed
     """
     for field, value in instance._original_fields.items():
-        if field in getattr(instance, '_tracked_fields', []) and \
-           getattr(instance, field) != value:
-            return True
+        if field != 'pk' and \
+           not isinstance(instance._meta.get_field(field), ManyToManyField):
+            if field in getattr(instance, '_tracked_fields', []) and \
+               getattr(instance, field) != value:
+                return True
     return False
 
 
@@ -58,10 +60,17 @@ def _has_changed_related(instance):
     """
     Check if some related tracked fields have changed
     """
+    tracked_related_fields = getattr(
+        instance,
+        '_tracked_related_fields',
+        {}
+    ).keys()
     for field, value in instance._original_fields.items():
-        if field in getattr(instance, '_tracked_related_fields', {}).keys() \
-           and getattr(instance, field) != value:
-            return True
+        if field != 'pk' and \
+           not isinstance(instance._meta.get_field(field), ManyToManyField):
+            if field in tracked_related_fields and \
+               getattr(instance, field) != value:
+                return True
     return False
 
 
@@ -133,7 +142,8 @@ def _create_create_tracking_event(instance):
     """
     event = _create_event(instance, CREATE)
     for field in instance._tracked_fields:
-        _create_tracked_field(event, instance, field)
+        if not isinstance(instance._meta.get_field(field), ManyToManyField):
+            _create_tracked_field(event, instance, field)
 
 
 def _create_update_tracking_event(instance):
@@ -142,8 +152,9 @@ def _create_update_tracking_event(instance):
     """
     event = _create_event(instance, UPDATE)
     for field in instance._tracked_fields:
-        if instance._original_fields[field] != getattr(instance, field):
-            _create_tracked_field(event, instance, field)
+        if not isinstance(instance._meta.get_field(field), ManyToManyField):
+            if instance._original_fields[field] != getattr(instance, field):
+                _create_tracked_field(event, instance, field)
 
 
 def _create_update_tracking_related_event(instance):
@@ -187,11 +198,11 @@ def _get_m2m_field(model, sender):
     """
     Get the field name from a model and a sender from m2m_changed signal.
     """
-    for field in model._tracked_fields:
+    for field in getattr(model, '_tracked_fields', []):
         if isinstance(model._meta.get_field(field), ManyToManyField):
             if getattr(model, field).through == sender:
                 return field
-    for field in model._tracked_related_fields.keys():
+    for field in getattr(model, '_tracked_related_fields', {}).keys():
         if isinstance(model._meta.get_field(field), ManyToManyField):
             if getattr(model, field).through == sender:
                 return field
