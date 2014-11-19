@@ -2,6 +2,7 @@ import datetime
 import json
 import logging
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model, ManyToManyField
 from django.db.models.fields.files import FieldFile
 
@@ -172,7 +173,11 @@ def _create_update_tracking_related_event(instance):
 
     # Create the events from the events dict
     for related_field, fields in events.items():
-        related_instances = getattr(instance, related_field[1])
+        try:
+            related_instances = getattr(instance, related_field[1])
+        except ObjectDoesNotExist:
+            continue
+
         # FIXME: isinstance(related_instances, RelatedManager ?)
         if hasattr(related_instances, 'all'):
             related_instances = related_instances.all()
@@ -248,7 +253,10 @@ def _create_tracked_event_m2m(model, instance, sender, objects, action):
         # In case of a m2m tracked on a related model
         related_fields = model._tracked_related_fields[field]
         for related_field in related_fields:
-            related_instances = getattr(instance, related_field[1])
+            try:
+                related_instances = getattr(instance, related_field[1])
+            except ObjectDoesNotExist:
+                continue
             # FIXME: isinstance(related_instances, RelatedManager ?)
             if hasattr(related_instances, 'all'):
                 related_instances = related_instances.all()
@@ -260,7 +268,7 @@ def _create_tracked_event_m2m(model, instance, sender, objects, action):
                 _create_tracked_field_m2m(
                     event, instance, field, objects, action, fieldname
                 )
-    else:
+    if field in getattr(model, '_tracked_fields', []):
         event = _create_event(instance, action)
         _create_tracked_field_m2m(event, instance, field, objects, action)
 

@@ -11,7 +11,7 @@ class Pet(models.Model):
     picture = models.ImageField(null=True)
 
     def __unicode__(self):
-        return '{}'.format(self.name)
+        return '{0}'.format(self.name)
 
 
 @track('birthday', 'name', 'age', 'pets', 'favourite_pet')
@@ -26,4 +26,12 @@ class Human(models.Model):
     height = models.PositiveIntegerField(help_text="Not tracked")
 
     def __unicode__(self):
-        return '{}'.format(self.name)
+        return '{0}'.format(self.name)
+
+
+@track('tenant__name', 'tenant__pets', 'tenant__favourite_pet')
+class House(models.Model):
+    tenant = models.OneToOneField(Human, null=True)
+
+    def __unicode__(self):
+        return 'House of {0}'.format(self.human)
