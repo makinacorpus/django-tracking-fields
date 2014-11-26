@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime
 import json
 
@@ -194,6 +195,15 @@ class TrackingEventTestCase(TestCase):
         self.human.save()
         events = TrackingEvent.objects.all()
         self.assertEqual(events.count(), 2)
+
+    def test_utf8_in_repr(self):
+        """
+        Test to save object with utf8 in its repr
+        """
+        self.human.name = u'😵'
+        self.human.save()
+        events = TrackingEvent.objects.all()
+        self.assertEqual(events.count(), 3)
 
 
 class TrackedFieldModificationTestCase(TestCase):
