@@ -45,7 +45,7 @@ class TrackingEvent(models.Model):
         help_text=_(
             "Object representation, useful if the object is deleted later."
         ),
-        max_length=100,
+        max_length=250,
         editable=False
     )
 
@@ -62,7 +62,7 @@ class TrackingEvent(models.Model):
         help_text=_(
             "User representation, useful if the user is deleted later."
         ),
-        max_length=100,
+        max_length=250,
         editable=False
     )
 
