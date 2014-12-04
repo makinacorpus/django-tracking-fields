@@ -42,9 +42,9 @@ class TrackerEventListFilter(admin.SimpleListFilter):
         qs = model_admin.get_queryset(request)
         objects = qs.values('object_content_type', 'object_id',)
         lookups = {}
-        for object in objects:
+        for obj in objects:
             value = u'{0}:{1}'.format(
-                object['object_content_type'], object['object_id']
+                obj['object_content_type'], obj['object_id']
             )
             lookups[value] = value
         return [(lookup[0], lookup[1]) for lookup in lookups.items()]
@@ -56,6 +56,38 @@ class TrackerEventListFilter(admin.SimpleListFilter):
         return queryset.filter(
             object_content_type_id=value[0],
             object_id=value[1]
+        )
+
+
+class TrackerEventUserFilter(admin.SimpleListFilter):
+    """ Filter on users. """
+    title = _("User")
+    parameter_name = 'user'
+
+    def lookups(self, request, model_admin):
+        qs = model_admin.get_queryset(request)
+        users = qs.values('user_content_type', 'user_id',)
+        lookups = {}
+        for user in users:
+            if user['user_content_type'] is None:
+                continue
+            value = u'{0}:{1}'.format(
+                user['user_content_type'], user['user_id']
+            )
+            user_obj = (
+                ContentType.objects.get_for_id(user['user_content_type'])
+                .get_object_for_this_type(pk=user['user_id'])
+            )
+            lookups[value] = getattr(user_obj, 'username', unicode(user_obj))
+        return [(lookup[0], lookup[1]) for lookup in lookups.items()]
+
+    def queryset(self, request, queryset):
+        if self.value() is None:
+            return queryset
+        value = self.value().split(':')
+        return queryset.filter(
+            user_content_type_id=value[0],
+            user_id=value[1]
         )
 
 
@@ -71,7 +103,7 @@ class TrackedFieldModificationAdmin(admin.TabularInline):
 class TrackingEventAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
     list_display = ('date', 'action', 'object', 'object_repr')
-    list_filter = ('action', TrackerEventListFilter,)
+    list_filter = ('action', TrackerEventUserFilter, TrackerEventListFilter,)
     search_fields = ('object_repr', 'user_repr',)
     readonly_fields = (
         'date', 'action', 'object', 'object_repr', 'user', 'user_repr',
