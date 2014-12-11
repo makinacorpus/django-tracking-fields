@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import datetime
 import json
 
@@ -6,6 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.files import File
 from django.test import Client, TestCase
+from django.utils import six
 from django.utils.html import escape
 
 from cuser.middleware import CuserMiddleware
@@ -247,16 +250,17 @@ class TrackedFieldModificationTestCase(TestCase):
         self.assertEqual(human_event.fields.all().count(), 1)
         field = human_event.fields.get(field='favourite_pet')
         self.assertEqual(field.old_value, json.dumps(None))
-        self.assertEqual(field.new_value, json.dumps(unicode(self.pet)))
+        self.assertEqual(field.new_value, json.dumps(six.text_type(self.pet)))
 
     def test_add(self):
         self.human.pets.add(self.pet2)
         human_event = TrackingEvent.objects.last()
         self.assertEqual(human_event.fields.all().count(), 1)
         field = human_event.fields.get(field='pets')
-        self.assertEqual(field.old_value, json.dumps([unicode(self.pet)]))
+        self.assertEqual(field.old_value,
+                         json.dumps([six.text_type(self.pet)]))
         self.assertEqual(field.new_value, json.dumps([
-            unicode(self.pet), unicode(self.pet2)
+            six.text_type(self.pet), six.text_type(self.pet2)
         ]))
 
     def test_add_reverse(self):
@@ -264,9 +268,10 @@ class TrackedFieldModificationTestCase(TestCase):
         human_event = TrackingEvent.objects.last()
         self.assertEqual(human_event.fields.all().count(), 1)
         field = human_event.fields.get(field='pets')
-        self.assertEqual(field.old_value, json.dumps([unicode(self.pet)]))
+        self.assertEqual(field.old_value,
+                         json.dumps([six.text_type(self.pet)]))
         self.assertEqual(field.new_value, json.dumps([
-            unicode(self.pet), unicode(self.pet2)
+            six.text_type(self.pet), six.text_type(self.pet2)
         ]))
 
     def test_remove(self):
@@ -276,9 +281,10 @@ class TrackedFieldModificationTestCase(TestCase):
         self.assertEqual(human_event.fields.all().count(), 1)
         field = human_event.fields.get(field='pets')
         self.assertEqual(field.old_value, json.dumps([
-            unicode(self.pet), unicode(self.pet2)
+            six.text_type(self.pet), six.text_type(self.pet2)
         ]))
-        self.assertEqual(field.new_value, json.dumps([unicode(self.pet)]))
+        self.assertEqual(field.new_value,
+                         json.dumps([six.text_type(self.pet)]))
 
     def test_remove_reverse(self):
         self.human.pets.add(self.pet2)
@@ -287,9 +293,10 @@ class TrackedFieldModificationTestCase(TestCase):
         self.assertEqual(human_event.fields.all().count(), 1)
         field = human_event.fields.get(field='pets')
         self.assertEqual(field.old_value, json.dumps([
-            unicode(self.pet), unicode(self.pet2)
+            six.text_type(self.pet), six.text_type(self.pet2)
         ]))
-        self.assertEqual(field.new_value, json.dumps([unicode(self.pet)]))
+        self.assertEqual(field.new_value,
+                         json.dumps([six.text_type(self.pet)]))
 
     def test_clear(self):
         self.human.pets.add(self.pet2)
@@ -298,7 +305,7 @@ class TrackedFieldModificationTestCase(TestCase):
         self.assertEqual(human_event.fields.all().count(), 1)
         field = human_event.fields.get(field='pets')
         self.assertEqual(field.old_value, json.dumps([
-            unicode(self.pet), unicode(self.pet2)
+            six.text_type(self.pet), six.text_type(self.pet2)
         ]))
         self.assertEqual(field.new_value, json.dumps([]))
 
@@ -309,9 +316,10 @@ class TrackedFieldModificationTestCase(TestCase):
         self.assertEqual(human_event.fields.all().count(), 1)
         field = human_event.fields.get(field='pets')
         self.assertEqual(field.old_value, json.dumps([
-            unicode(self.pet), unicode(self.pet2)
+            six.text_type(self.pet), six.text_type(self.pet2)
         ]))
-        self.assertEqual(field.new_value, json.dumps([unicode(self.pet)]))
+        self.assertEqual(field.new_value,
+                         json.dumps([six.text_type(self.pet)]))
 
     def test_date(self):
         today = datetime.date.today()
@@ -377,7 +385,7 @@ class TrackingRelatedTestCase(TestCase):
         field = house_event.fields.last()
         self.assertEqual(field.field, 'tenant__pets')
         self.assertEqual(field.old_value, json.dumps([]))
-        self.assertEqual(field.new_value, json.dumps([unicode(pet)]))
+        self.assertEqual(field.new_value, json.dumps([six.text_type(pet)]))
 
 
 class AdminModelTestCase(TestCase):

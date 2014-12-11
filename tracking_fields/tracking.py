@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import datetime
 import json
 import logging
@@ -5,6 +7,7 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model, ManyToManyField
 from django.db.models.fields.files import FieldFile
+from django.utils import six
 
 try:
     from cuser.middleware import CuserMiddleware
@@ -111,7 +114,8 @@ def _serialize_field(field):
             # No file
             return json.dumps(None, ensure_ascii=False).encode('utf8')
     if isinstance(field, Model):
-        return json.dumps(unicode(field), ensure_ascii=False).encode('utf8')
+        return json.dumps(six.text_type(field),
+                          ensure_ascii=False).encode('utf8')
     try:
         return json.dumps(field, ensure_ascii=False).encode('utf8')
     except TypeError:
@@ -223,8 +227,8 @@ def _create_tracked_field_m2m(event, instance, field, objects, action,
         after = [obj for obj in before if obj not in objects]
     elif action == 'CLEAR':
         after = []
-    before = map(unicode, before)
-    after = map(unicode, after)
+    before = list(map(six.text_type, before))
+    after = list(map(six.text_type, after))
     return TrackedFieldModification.objects.create(
         event=event,
         field=fieldname,
