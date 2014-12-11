@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
+from django.shortcuts import get_object_or_404
 from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _
 
@@ -13,7 +14,7 @@ class TrackedObjectMixinAdmin(admin.ModelAdmin):
     """
     class Meta:
         abstract = True
-    change_form_template = 'tracking_fields/admin/change_form.html'
+    change_form_template = 'tracking_fields/admin/change_form_object.html'
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
         extra_context = extra_context or {}
@@ -111,6 +112,24 @@ class TrackingEventAdmin(admin.ModelAdmin):
     inlines = (
         TrackedFieldModificationAdmin,
     )
+    change_list_template = 'tracking_fields/admin/change_list_event.html'
 
+    def changelist_view(self, request, extra_context=None):
+        """ Get object currently tracked and add a button to get back to it """
+        extra_context = extra_context or {}
+        if 'object' in request.GET.keys():
+            value = request.GET['object'].split(':')
+            content_type = get_object_or_404(
+                ContentType,
+                id=value[0],
+            )
+            tracked_object = get_object_or_404(
+                content_type.model_class(),
+                id=value[1],
+            )
+            extra_context['tracked_object'] = tracked_object
+            extra_context['tracked_object_opts'] = tracked_object._meta
+        return super(TrackingEventAdmin, self).changelist_view(
+            request, extra_context)
 
 admin.site.register(TrackingEvent, TrackingEventAdmin)

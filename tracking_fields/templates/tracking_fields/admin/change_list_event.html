@@ -1,0 +1,12 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+  {% if tracked_object %}
+  <li>
+    {% url tracked_object_opts|admin_urlname:'change' tracked_object.pk|admin_urlquote as tracked_object_url %}
+    <a href="{{ tracked_object_url }}" class="historylink">{{ tracked_object }}</a>
+  </li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

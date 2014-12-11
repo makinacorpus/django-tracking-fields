@@ -411,7 +411,7 @@ class AdminModelTestCase(TestCase):
         )
 
     def test_history_btn(self):
-        """ Test the admin view listing all objects. """
+        """ Test the tracking button is present. """
         response = self.c.get(
             '/admin/tests/human/{}'.format(self.human.pk),
             follow=True,
@@ -419,4 +419,36 @@ class AdminModelTestCase(TestCase):
         self.assertContains(
             response,
             ' class="historylink">Tracking</a>',
+        )
+
+    def test_history_back_btn_is_present(self):
+        """
+        Test the button back to the button is present
+        where there is an object filter.
+        """
+        content_type = ContentType.objects.get(
+            app_label="tests", model="human"
+        )
+        param = 'object={0}%3A{1}'.format(content_type.pk, self.human.pk)
+        response = self.c.get(
+            '/admin/tracking_fields/trackingevent/?{0}'.format(param),
+            follow=True,
+        )
+        self.assertContains(
+            response,
+            ' class="historylink">{0}</a>'.format(self.human),
+        )
+
+    def test_history_back_btn_is_not_present(self):
+        """
+        Test the button back to the button is not present
+        where there is no object filter.
+        """
+        response = self.c.get(
+            '/admin/tracking_fields/trackingevent/',
+            follow=True,
+        )
+        self.assertNotContains(
+            response,
+            ' class="historylink">',
         )
