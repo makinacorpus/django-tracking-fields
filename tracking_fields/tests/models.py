@@ -8,7 +8,7 @@ class Pet(models.Model):
     vet_appointment = models.DateTimeField(null=True)
     name = models.CharField(max_length=30)
     age = models.PositiveSmallIntegerField()
-    picture = models.ImageField(null=True)
+    picture = models.ImageField(upload_to=".", null=True)
 
     def __unicode__(self):
         return u'{0}'.format(self.name)

@@ -54,8 +54,12 @@ def _has_changed(instance):
     for field, value in instance._original_fields.items():
         if field != 'pk' and \
            not isinstance(instance._meta.get_field(field), ManyToManyField):
-            if field in getattr(instance, '_tracked_fields', []) and \
-               getattr(instance, field) != value:
+            try:
+                if field in getattr(instance, '_tracked_fields', []) and \
+                   getattr(instance, field) != value:
+                    return True
+            except TypeError:
+                # Can't compare old and new value, should be different.
                 return True
     return False
 
@@ -158,7 +162,12 @@ def _create_update_tracking_event(instance):
     event = _create_event(instance, UPDATE)
     for field in instance._tracked_fields:
         if not isinstance(instance._meta.get_field(field), ManyToManyField):
-            if instance._original_fields[field] != getattr(instance, field):
+            try:
+                if instance._original_fields[field] != \
+                   getattr(instance, field):
+                    _create_tracked_field(event, instance, field)
+            except TypeError:
+                # Can't compare old and new value, should be different.
                 _create_tracked_field(event, instance, field)
 
 
