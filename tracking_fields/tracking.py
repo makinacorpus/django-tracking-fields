@@ -7,6 +7,7 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model, ManyToManyField
 from django.db.models.fields.files import FieldFile
+from django.db.models.fields.related import ForeignKey
 from django.utils import six
 
 try:
@@ -35,7 +36,13 @@ def _set_original_fields(instance):
         if instance.pk is None:
             original_fields[field] = None
         else:
-            original_fields[field] = getattr(instance, field)
+            if isinstance(instance._meta.get_field(field), ForeignKey):
+                # Only get the PK, we don't want to get the object
+                # (which would make an additional request)
+                original_fields[field] = getattr(instance,
+                                                 '{0}_id'.format(field))
+            else:
+                original_fields[field] = getattr(instance, field)
 
     for field in getattr(instance, '_tracked_fields', []):
         _set_original_field(instance, field)
@@ -55,9 +62,13 @@ def _has_changed(instance):
         if field != 'pk' and \
            not isinstance(instance._meta.get_field(field), ManyToManyField):
             try:
-                if field in getattr(instance, '_tracked_fields', []) and \
-                   getattr(instance, field) != value:
-                    return True
+                if field in getattr(instance, '_tracked_fields', []):
+                    if isinstance(instance._meta.get_field(field), ForeignKey):
+                        if getattr(instance, '{0}_id'.format(field)) != value:
+                            return True
+                    else:
+                        if getattr(instance, field) != value:
+                            return True
             except TypeError:
                 # Can't compare old and new value, should be different.
                 return True
@@ -76,9 +87,13 @@ def _has_changed_related(instance):
     for field, value in instance._original_fields.items():
         if field != 'pk' and \
            not isinstance(instance._meta.get_field(field), ManyToManyField):
-            if field in tracked_related_fields and \
-               getattr(instance, field) != value:
-                return True
+            if field in tracked_related_fields:
+                if isinstance(instance._meta.get_field(field), ForeignKey):
+                    if getattr(instance, '{0}_id'.format(field)) != value:
+                        return True
+                else:
+                    if getattr(instance, field) != value:
+                        return True
     return False
 
 
