@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+from django.contrib.contenttypes.models import ContentType
+from django.core.urlresolvers import reverse
 from django.db.models import ManyToManyField
 from django.db.models.signals import (
     post_init, post_save, pre_delete, m2m_changed
@@ -105,6 +107,20 @@ def _track_class(cls, fields):
     ]
 
 
+def _add_get_tracking_url(cls):
+    """ Add a method to get the tracking url of an object. """
+    def get_tracking_url(self):
+        """ return url to tracking view in admin panel """
+        url = reverse('admin:tracking_fields_trackingevent_changelist')
+        object_id = '{0}%3A{1}'.format(
+            ContentType.objects.get_for_model(self).pk,
+            self.pk
+        )
+        return '{0}?object={1}'.format(url, object_id)
+    if not hasattr(cls, 'get_tracking_url'):
+        setattr(cls, 'get_tracking_url', get_tracking_url)
+
+
 def track(*fields):
     """
        Decorator used to track changes on Model's fields.
@@ -116,5 +132,6 @@ def track(*fields):
     """
     def inner(cls):
         _track_class(cls, fields)
+        _add_get_tracking_url(cls)
         return cls
     return inner
