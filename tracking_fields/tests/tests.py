@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.files import File
 from django.test import Client, TestCase
-from django.utils import six
+from django.utils import six, timezone
 from django.utils.html import escape
 
 from cuser.middleware import CuserMiddleware
@@ -252,6 +252,30 @@ class TrackedFieldModificationTestCase(TestCase):
         self.assertEqual(field.old_value, json.dumps(None))
         self.assertEqual(field.new_value, json.dumps(six.text_type(self.pet)))
 
+    def test_foreign_key_not_changed(self):
+        """ Test a foreign key does not change if only other values change """
+        self.human.favourite_pet = self.pet
+        self.human.save()
+        self.human.name = "Toto"
+        self.human.save()
+        human_event = TrackingEvent.objects.last()
+        self.assertEqual(human_event.fields.all().count(), 1)
+        field = human_event.fields.first()
+        self.assertEqual(field.old_value, json.dumps("George"))
+        self.assertEqual(field.new_value, json.dumps("Toto"))
+
+    def test_foreign_key_label(self):
+        """ Test label of foreign keys are used in tracked fields """
+        self.human.favourite_pet = self.pet
+        self.human.save()
+        self.human.favourite_pet = self.pet2
+        self.human.save()
+        human_event = TrackingEvent.objects.last()
+        self.assertEqual(human_event.fields.all().count(), 1)
+        field = human_event.fields.first()
+        self.assertEqual(field.old_value, json.dumps(six.text_type(self.pet)))
+        self.assertEqual(field.new_value, json.dumps(six.text_type(self.pet2)))
+
     def test_add(self):
         self.human.pets.add(self.pet2)
         human_event = TrackingEvent.objects.last()
@@ -332,7 +356,7 @@ class TrackedFieldModificationTestCase(TestCase):
                          json.dumps(today.strftime('%Y-%m-%d')))
 
     def test_datetime(self):
-        now = datetime.datetime.now()
+        now = timezone.now()
         self.pet.vet_appointment = now
         self.pet.save()
         pet_event = TrackingEvent.objects.last()

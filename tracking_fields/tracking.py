@@ -152,10 +152,19 @@ def _create_tracked_field(event, instance, field, fieldname=None):
     :param fieldname: The displayed name for the field. Default to field.
     """
     fieldname = fieldname or field
+    if isinstance(instance._meta.get_field(field), ForeignKey):
+        model = instance._meta.get_field(field).rel.to
+        pk = instance._original_fields[field]
+        try:
+            old_value = model.objects.get(pk=pk)
+        except model.DoesNotExist:
+            old_value = None
+    else:
+        old_value = instance._original_fields[field]
     return TrackedFieldModification.objects.create(
         event=event,
         field=fieldname,
-        old_value=_serialize_field(instance._original_fields[field]),
+        old_value=_serialize_field(old_value),
         new_value=_serialize_field(getattr(instance, field))
     )
 
@@ -178,8 +187,11 @@ def _create_update_tracking_event(instance):
     for field in instance._tracked_fields:
         if not isinstance(instance._meta.get_field(field), ManyToManyField):
             try:
-                if instance._original_fields[field] != \
-                   getattr(instance, field):
+                if isinstance(instance._meta.get_field(field), ForeignKey):
+                    value = getattr(instance, '{0}_id'.format(field))
+                else:
+                    value = getattr(instance, field)
+                if instance._original_fields[field] != value:
                     _create_tracked_field(event, instance, field)
             except TypeError:
                 # Can't compare old and new value, should be different.
@@ -195,7 +207,11 @@ def _create_update_tracking_related_event(instance):
     # Create a dict mapping related model field to modified fields
     for field, related_fields in instance._tracked_related_fields.items():
         if not isinstance(instance._meta.get_field(field), ManyToManyField):
-            if instance._original_fields[field] != getattr(instance, field):
+            if isinstance(instance._meta.get_field(field), ForeignKey):
+                value = getattr(instance, '{0}_id'.format(field))
+            else:
+                value = getattr(instance, field)
+            if instance._original_fields[field] != value:
                 for related_field in related_fields:
                     events.setdefault(related_field, []).append(field)
 
