@@ -153,6 +153,7 @@ def _create_tracked_field(event, instance, field, fieldname=None):
     """
     fieldname = fieldname or field
     if isinstance(instance._meta.get_field(field), ForeignKey):
+        # We only have the pk, we need to get the actual object
         model = instance._meta.get_field(field).rel.to
         pk = instance._original_fields[field]
         try:
@@ -188,6 +189,7 @@ def _create_update_tracking_event(instance):
         if not isinstance(instance._meta.get_field(field), ManyToManyField):
             try:
                 if isinstance(instance._meta.get_field(field), ForeignKey):
+                    # Compare pk
                     value = getattr(instance, '{0}_id'.format(field))
                 else:
                     value = getattr(instance, field)
@@ -208,6 +210,7 @@ def _create_update_tracking_related_event(instance):
     for field, related_fields in instance._tracked_related_fields.items():
         if not isinstance(instance._meta.get_field(field), ManyToManyField):
             if isinstance(instance._meta.get_field(field), ForeignKey):
+                # Compare pk
                 value = getattr(instance, '{0}_id'.format(field))
             else:
                 value = getattr(instance, field)
