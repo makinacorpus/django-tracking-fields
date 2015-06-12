@@ -1,8 +1,10 @@
 *~
 \#*
+.#*
 *pyc
 
 /dist
 /*.egg-info
 /.coverage
 /htmlcov
+/.idea

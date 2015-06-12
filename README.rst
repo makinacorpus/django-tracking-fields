@@ -11,6 +11,12 @@ Tracking Fields
 
 A Django app allowing the tracking of objects field in the admin site.
 
+Requirements
+------------
+
+* Django 1.8: See version 0.1 for earlier version of Django.
+* django-cuser: Only if you want to track which user made the modifications.
+
 Quick start
 -----------
 
