@@ -45,6 +45,11 @@ Quick start
 
 6. You can run the tests by doing ``make test`` (make sure to have ``django-cuser`` installed).
 
+Upgrades from 0.1 or 1.0.1
+==========================
+
+The change to UUID is a mess to do in a migration. The migrations have thus been squashed. You can either alter your fields by hand and do a fake migration afterward or remove your tracking fields tables and run migrations again.
+
 FAQ
 ===
 
