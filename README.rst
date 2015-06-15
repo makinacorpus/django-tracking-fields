@@ -48,7 +48,10 @@ Quick start
 Upgrades from 0.1 or 1.0.1
 ==========================
 
-The change to UUID is a mess to do in a migration. The migrations have thus been squashed. You can either alter your fields by hand and do a fake migration afterward or remove your tracking fields tables and run migrations again.
+The change to UUID is a mess to do in a migration. The migrations have thus been squashed. You can either alter your fields by hand and do a fake migration afterward or remove your tracking fields tables and run migrations again::
+
+    ./manage.py migrate --fake tracking_fields zero
+    ./manage.py migrate tracking_fields
 
 FAQ
 ===
