@@ -1,8 +1,12 @@
+import codecs
 import os
+from os import path
 from setuptools import setup, find_packages
 
-with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
-    README = readme.read()
+
+def read(*parts):
+    return codecs.open(path.join(path.dirname(__file__), *parts),
+                       encoding='utf-8').read()
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
@@ -17,7 +21,9 @@ setup(
         'A Django app allowing the tracking of objects field '
         'in the admin site.'
     ),
-    long_description=README,
+    long_description=u'\n\n'.join((
+        read('README.rst'),
+        read('CHANGES.rst'))),
     url='https://github.com/makinacorpus/django-tracking-fields',
     author='Yann Fouillat (alias Gagaro)',
     author_email='yann.fouillat@makina-corpus.com',

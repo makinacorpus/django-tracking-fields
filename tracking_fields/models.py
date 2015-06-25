@@ -78,6 +78,7 @@ class TrackingEvent(models.Model):
     class Meta:
         verbose_name = _('Tracking event')
         verbose_name_plural = _('Tracking events')
+        ordering = ['-date']
 
 
 class TrackedFieldModification(models.Model):
