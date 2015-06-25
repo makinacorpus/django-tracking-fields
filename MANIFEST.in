@@ -3,3 +3,5 @@ include README.rst
 include requirements.txt
 include dev-requirements.txt
 recursive-include doc *
+recursive-include tracking_fields/templates *.html
+recursive-include tracking_fields/locale *
