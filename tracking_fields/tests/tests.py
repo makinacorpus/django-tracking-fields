@@ -420,9 +420,10 @@ class TrackingRelatedTestCase(TestCase):
 
 class AdminModelTestCase(TestCase):
     def setUp(self):
-        User.objects.create_superuser('admin', '', 'password')
+        self.user = User.objects.create_superuser('admin', '', 'password')
         self.c = Client()
         self.c.login(username="admin", password="password")
+        CuserMiddleware.set_user(self.user)
         self.human = Human.objects.create(name="George", age=42, height=175)
 
     def test_list(self):

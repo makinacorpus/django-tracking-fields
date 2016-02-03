@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
+from django.utils.six import text_type
 from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _
 
@@ -79,7 +80,7 @@ class TrackerEventUserFilter(admin.SimpleListFilter):
                 ContentType.objects.get_for_id(user['user_content_type'])
                 .get_object_for_this_type(pk=user['user_id'])
             )
-            lookups[value] = getattr(user_obj, 'username', unicode(user_obj))
+            lookups[value] = getattr(user_obj, 'username', text_type(user_obj))
         return [(lookup[0], lookup[1]) for lookup in lookups.items()]
 
     def queryset(self, request, queryset):

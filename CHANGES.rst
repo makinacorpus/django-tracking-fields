@@ -1,10 +1,10 @@
 Changelog
 ---------
 
-1.0.6 (not released)
-~~~~~~~~~~~~~~~~~~~~
+1.0.6
+~~~~~
 
-*
+* Fix unicode error in admin with Python 3.4 and django_cuser
 
 1.0.5
 ~~~~~
