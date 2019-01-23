@@ -38,8 +38,8 @@ def _track_class_related_field(cls, field):
     # related_field = field on related model
     (field, related_field) = field.split('__', 1)
     field_obj = cls._meta.get_field(field)
-    related_cls = field_obj.rel.to
-    related_name = field_obj.related.get_accessor_name()
+    related_cls = field_obj.remote_field.model
+    related_name = field_obj.remote_field.get_accessor_name()
 
     if not hasattr(related_cls, '_tracked_related_fields'):
         setattr(related_cls, '_tracked_related_fields', {})

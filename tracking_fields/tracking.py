@@ -72,7 +72,7 @@ def _has_changed(instance):
             except TypeError:
                 # Can't compare old and new value, should be different.
                 return True
-    return False
+        return False
 
 
 def _has_changed_related(instance):
@@ -106,7 +106,7 @@ def _create_event(instance, action):
     if CUSER:
         user = CuserMiddleware.get_user()
         user_repr = repr(user)
-        if user is not None and user.is_anonymous():
+        if user is not None and user.is_anonymous:
             user = None
     return TrackingEvent.objects.create(
         action=action,
@@ -154,7 +154,7 @@ def _create_tracked_field(event, instance, field, fieldname=None):
     fieldname = fieldname or field
     if isinstance(instance._meta.get_field(field), ForeignKey):
         # We only have the pk, we need to get the actual object
-        model = instance._meta.get_field(field).rel.to
+        model = instance._meta.get_field(field).remote_field.model
         pk = instance._original_fields[field]
         try:
             old_value = model.objects.get(pk=pk)

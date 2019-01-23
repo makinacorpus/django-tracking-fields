@@ -21,7 +21,7 @@ class Human(models.Model):
     age = models.PositiveSmallIntegerField()
     pets = models.ManyToManyField(Pet, null=True)
     favourite_pet = models.ForeignKey(
-        Pet, related_name="favorited_by", null=True
+        Pet, related_name="favorited_by", null=True, on_delete=models.CASCADE,
     )
     height = models.PositiveIntegerField(help_text="Not tracked")
 
@@ -31,7 +31,7 @@ class Human(models.Model):
 
 @track('tenant__name', 'tenant__pets', 'tenant__favourite_pet')
 class House(models.Model):
-    tenant = models.OneToOneField(Human, null=True)
+    tenant = models.OneToOneField(Human, null=True, on_delete=models.CASCADE)
 
     def __unicode__(self):
         return u'House of {0}'.format(self.tenant)

@@ -14,7 +14,7 @@ A Django app allowing the tracking of objects field in the admin site.
 Requirements
 ------------
 
-* Django 2.1.2: See version 0.1 for earlier version of Django.
+* Django 1.11: See older versions for earlier version of Django.
 * django-cuser: Only if you want to track which user made the modifications.
 
 Quick start
@@ -43,7 +43,7 @@ Quick start
          related = models.ForeignKey(MyModel)
 
 
-6. You can run the tests by doing ``make test`` (make sure to have ``django-cuser`` installed).
+6. You can run the tests with ``tox`` (make sure to have ``django-cuser`` installed).
 
 Upgrades from 0.1 or 1.0.1
 ==========================
