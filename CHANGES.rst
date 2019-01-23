@@ -4,7 +4,7 @@ Changelog
 1.0.7 (not released yet)
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-* ...
+* django 2.1.2 / Python 3.5+
 
 1.0.6
 ~~~~~

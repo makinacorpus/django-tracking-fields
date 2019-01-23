@@ -43,7 +43,8 @@ class TrackingEvent(models.Model):
     object_content_type = models.ForeignKey(
         ContentType,
         related_name='tracking_object_content_type',
-        editable=False
+        editable=False,
+        on_delete=models.CASCADE,
     )
     object_id = models.PositiveIntegerField(editable=False, null=True)
     object = GenericForeignKey('object_content_type', 'object_id')
@@ -62,6 +63,7 @@ class TrackingEvent(models.Model):
         related_name='tracking_user_content_type',
         editable=False,
         null=True,
+        on_delete=models.CASCADE,
     )
     user_id = models.PositiveIntegerField(editable=False, null=True)
     user = GenericForeignKey('user_content_type', 'user_id')
@@ -86,7 +88,8 @@ class TrackedFieldModification(models.Model):
 
     event = models.ForeignKey(
         TrackingEvent, verbose_name=_("Event"), related_name='fields',
-        editable=False
+        editable=False,
+        on_delete=models.CASCADE,
     )
 
     field = models.CharField(_("Field"), max_length=40, editable=False)

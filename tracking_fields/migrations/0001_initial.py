@@ -35,8 +35,8 @@ class Migration(migrations.Migration):
                 ('object_repr', models.CharField(help_text='Object representation, useful if the object is deleted later.', verbose_name='Object representation', max_length=250, editable=False)),
                 ('user_id', models.PositiveIntegerField(null=True, editable=False)),
                 ('user_repr', models.CharField(help_text='User representation, useful if the user is deleted later.', verbose_name='User representation', max_length=250, editable=False)),
-                ('object_content_type', models.ForeignKey(related_name='tracking_object_content_type', editable=False, to='contenttypes.ContentType')),
-                ('user_content_type', models.ForeignKey(related_name='tracking_user_content_type', editable=False, to='contenttypes.ContentType', null=True)),
+                ('object_content_type', models.ForeignKey(related_name='tracking_object_content_type', editable=False, to='contenttypes.ContentType', on_delete=models.CASCADE)),
+                ('user_content_type', models.ForeignKey(related_name='tracking_user_content_type', editable=False, to='contenttypes.ContentType', null=True, on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name': 'Tracking event',
@@ -46,6 +46,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='trackedfieldmodification',
             name='event',
-            field=models.ForeignKey(related_name='fields', editable=False, to='tracking_fields.TrackingEvent', verbose_name='Event'),
+            field=models.ForeignKey(related_name='fields', editable=False, to='tracking_fields.TrackingEvent', verbose_name='Event', on_delete=models.CASCADE),
         ),
     ]
