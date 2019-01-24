@@ -1,10 +1,11 @@
 Changelog
 ---------
 
-1.0.7 (not released yet)
-~~~~~~~~~~~~~~~~~~~~~~~~
+1.1.0 (2019-01-24)
+~~~~~~~~~~~~~~~~~~
 
-* django 2.1.2 / Python 3.5+
+* Compatibility with Django 1.11 to 2.1
+* Compatibility droped for earlier versions
 
 1.0.6
 ~~~~~
