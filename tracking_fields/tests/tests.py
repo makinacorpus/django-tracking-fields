@@ -41,14 +41,14 @@ class TrackingEventTestCase(TestCase):
         Test the CREATE event
         """
         events = TrackingEvent.objects.order_by('date').all()
-        self.assertEqual(events.count(), 2)
+        assert events.count() == 2
         human_event = events.last()
-        self.assertIsNotNone(human_event.date)
-        self.assertEqual(human_event.action, CREATE)
-        self.assertEqual(human_event.object, self.human)
-        self.assertEqual(human_event.object_repr, self.human_repr)
-        self.assertEqual(human_event.user, self.user)
-        self.assertEqual(human_event.user_repr, self.user_repr)
+        assert human_event.date is not None
+        assert human_event.action == CREATE
+        assert human_event.object == self.human
+        assert human_event.object_repr == self.human_repr
+        assert human_event.user == self.user
+        assert human_event.user_repr == self.user_repr
 
     def test_update_without_cuser(self):
         """
@@ -59,14 +59,14 @@ class TrackingEventTestCase(TestCase):
         self.human.age = 43
         self.human.save()
         events = TrackingEvent.objects.order_by('date').all()
-        self.assertEqual(events.count(), 3)
+        assert events.count() == 3
         human_event = events.last()
-        self.assertIsNotNone(human_event.date)
-        self.assertEqual(human_event.action, UPDATE)
-        self.assertEqual(human_event.object, self.human)
-        self.assertEqual(human_event.object_repr, self.human_repr)
-        self.assertEqual(human_event.user, None)
-        self.assertEqual(human_event.user_repr, 'None')
+        assert human_event.date is not None
+        assert human_event.action == UPDATE
+        assert human_event.object == self.human
+        assert human_event.object_repr == self.human_repr
+        assert human_event.user == None
+        assert human_event.user_repr == 'None'
         tracking.CUSER = True
 
     def test_update(self):
@@ -76,14 +76,14 @@ class TrackingEventTestCase(TestCase):
         self.human.age = 43
         self.human.save()
         events = TrackingEvent.objects.order_by('date').all()
-        self.assertEqual(events.count(), 3)
+        assert events.count() == 3
         human_event = events.last()
-        self.assertIsNotNone(human_event.date)
-        self.assertEqual(human_event.action, UPDATE)
-        self.assertEqual(human_event.object, self.human)
-        self.assertEqual(human_event.object_repr, self.human_repr)
-        self.assertEqual(human_event.user, self.user)
-        self.assertEqual(human_event.user_repr, self.user_repr)
+        assert human_event.date is not None
+        assert human_event.action == UPDATE
+        assert human_event.object == self.human
+        assert human_event.object_repr == self.human_repr
+        assert human_event.user == self.user
+        assert human_event.user_repr == self.user_repr
 
     def test_delete(self):
         """
@@ -91,14 +91,14 @@ class TrackingEventTestCase(TestCase):
         """
         self.human.delete()
         events = TrackingEvent.objects.order_by('date').all()
-        self.assertEqual(events.count(), 3)
+        assert events.count() == 3
         human_event = events.last()
-        self.assertIsNotNone(human_event.date)
-        self.assertEqual(human_event.action, DELETE)
-        self.assertEqual(human_event.object, None)  # Object is deleted
-        self.assertEqual(human_event.object_repr, self.human_repr)
-        self.assertEqual(human_event.user, self.user)
-        self.assertEqual(human_event.user_repr, self.user_repr)
+        assert human_event.date is not None
+        assert human_event.action == DELETE
+        assert human_event.object == None  # Object is deleted
+        assert human_event.object_repr == self.human_repr
+        assert human_event.user == self.user
+        assert human_event.user_repr == self.user_repr
 
     def test_add(self):
         """
@@ -106,14 +106,14 @@ class TrackingEventTestCase(TestCase):
         """
         self.human.pets.add(self.pet)
         events = TrackingEvent.objects.order_by('date').all()
-        self.assertEqual(events.count(), 3)
+        assert events.count() == 3
         human_event = events.last()
-        self.assertIsNotNone(human_event.date)
-        self.assertEqual(human_event.action, ADD)
-        self.assertEqual(human_event.object, self.human)
-        self.assertEqual(human_event.object_repr, self.human_repr)
-        self.assertEqual(human_event.user, self.user)
-        self.assertEqual(human_event.user_repr, self.user_repr)
+        assert human_event.date is not None
+        assert human_event.action == ADD
+        assert human_event.object == self.human
+        assert human_event.object_repr == self.human_repr
+        assert human_event.user == self.user
+        assert human_event.user_repr == self.user_repr
 
     def test_add_reverse(self):
         """
@@ -122,14 +122,14 @@ class TrackingEventTestCase(TestCase):
         # Event should be the same than the one from ``test_add``
         self.pet.human_set.add(self.human)
         events = TrackingEvent.objects.order_by('date').all()
-        self.assertEqual(events.count(), 3)
+        assert events.count() == 3
         human_event = events.last()
-        self.assertIsNotNone(human_event.date)
-        self.assertEqual(human_event.action, ADD)
-        self.assertEqual(human_event.object, self.human)
-        self.assertEqual(human_event.object_repr, self.human_repr)
-        self.assertEqual(human_event.user, self.user)
-        self.assertEqual(human_event.user_repr, self.user_repr)
+        assert human_event.date is not None
+        assert human_event.action == ADD
+        assert human_event.object == self.human
+        assert human_event.object_repr == self.human_repr
+        assert human_event.user == self.user
+        assert human_event.user_repr == self.user_repr
 
     def test_remove(self):
         """
@@ -138,14 +138,14 @@ class TrackingEventTestCase(TestCase):
         self.human.pets.add(self.pet)
         self.human.pets.remove(self.pet)
         events = TrackingEvent.objects.order_by('date').all()
-        self.assertEqual(events.count(), 4)
+        assert events.count() == 4
         human_event = events.last()
-        self.assertIsNotNone(human_event.date)
-        self.assertEqual(human_event.action, REMOVE)
-        self.assertEqual(human_event.object, self.human)
-        self.assertEqual(human_event.object_repr, self.human_repr)
-        self.assertEqual(human_event.user, self.user)
-        self.assertEqual(human_event.user_repr, self.user_repr)
+        assert human_event.date is not None
+        assert human_event.action == REMOVE
+        assert human_event.object == self.human
+        assert human_event.object_repr == self.human_repr
+        assert human_event.user == self.user
+        assert human_event.user_repr == self.user_repr
 
     def test_remove_reverse(self):
         """
@@ -155,14 +155,14 @@ class TrackingEventTestCase(TestCase):
         self.human.pets.add(self.pet)
         self.pet.human_set.remove(self.human)
         events = TrackingEvent.objects.order_by('date').all()
-        self.assertEqual(events.count(), 4)
+        assert events.count() == 4
         human_event = events.last()
-        self.assertIsNotNone(human_event.date)
-        self.assertEqual(human_event.action, REMOVE)
-        self.assertEqual(human_event.object, self.human)
-        self.assertEqual(human_event.object_repr, self.human_repr)
-        self.assertEqual(human_event.user, self.user)
-        self.assertEqual(human_event.user_repr, self.user_repr)
+        assert human_event.date is not None
+        assert human_event.action == REMOVE
+        assert human_event.object == self.human
+        assert human_event.object_repr == self.human_repr
+        assert human_event.user == self.user
+        assert human_event.user_repr == self.user_repr
 
     def test_clear(self):
         """
@@ -171,14 +171,14 @@ class TrackingEventTestCase(TestCase):
         self.human.pets.add(self.pet)
         self.human.pets.clear()
         events = TrackingEvent.objects.order_by('date').all()
-        self.assertEqual(events.count(), 4)
+        assert events.count() == 4
         human_event = events.last()
-        self.assertIsNotNone(human_event.date)
-        self.assertEqual(human_event.action, CLEAR)
-        self.assertEqual(human_event.object, self.human)
-        self.assertEqual(human_event.object_repr, self.human_repr)
-        self.assertEqual(human_event.user, self.user)
-        self.assertEqual(human_event.user_repr, self.user_repr)
+        assert human_event.date is not None
+        assert human_event.action == CLEAR
+        assert human_event.object == self.human
+        assert human_event.object_repr == self.human_repr
+        assert human_event.user == self.user
+        assert human_event.user_repr == self.user_repr
 
     def test_clear_reverse(self):
         """
@@ -187,15 +187,15 @@ class TrackingEventTestCase(TestCase):
         self.human.pets.add(self.pet)
         self.pet.human_set.clear()
         events = TrackingEvent.objects.order_by('date').all()
-        self.assertEqual(events.count(), 4)
+        assert events.count() == 4
         human_event = events.last()
-        self.assertIsNotNone(human_event.date)
+        assert human_event.date is not None
         # Event is actually a removal of pet from human
-        self.assertEqual(human_event.action, REMOVE)
-        self.assertEqual(human_event.object, self.human)
-        self.assertEqual(human_event.object_repr, self.human_repr)
-        self.assertEqual(human_event.user, self.user)
-        self.assertEqual(human_event.user_repr, self.user_repr)
+        assert human_event.action == REMOVE
+        assert human_event.object == self.human
+        assert human_event.object_repr == self.human_repr
+        assert human_event.user == self.user
+        assert human_event.user_repr == self.user_repr
 
     def test_save_with_no_change(self):
         """
@@ -203,7 +203,7 @@ class TrackingEventTestCase(TestCase):
         """
         self.human.save()
         events = TrackingEvent.objects.all()
-        self.assertEqual(events.count(), 2)
+        assert events.count() == 2
 
     def test_utf8_in_repr(self):
         """
@@ -212,7 +212,7 @@ class TrackingEventTestCase(TestCase):
         self.human.name = u'😵'
         self.human.save()
         events = TrackingEvent.objects.all()
-        self.assertEqual(events.count(), 3)
+        assert events.count() == 3
 
 
 class TrackedFieldModificationTestCase(TestCase):
@@ -230,33 +230,33 @@ class TrackedFieldModificationTestCase(TestCase):
 
     def test_create(self):
         human_event = TrackingEvent.objects.filter(action=CREATE).order_by('date').last()
-        self.assertEqual(human_event.fields.all().count(), 4)
+        assert human_event.fields.all().count() == 4
         field = human_event.fields.get(field='birthday')
-        self.assertEqual(field.new_value, json.dumps(self.human.birthday))
+        assert field.new_value == json.dumps(self.human.birthday)
         field = human_event.fields.get(field='name')
-        self.assertEqual(field.new_value, json.dumps(self.human.name))
+        assert field.new_value == json.dumps(self.human.name)
         field = human_event.fields.get(field='age')
-        self.assertEqual(field.new_value, json.dumps(self.human.age))
+        assert field.new_value == json.dumps(self.human.age)
         field = human_event.fields.get(field='favourite_pet')
-        self.assertEqual(field.new_value, json.dumps(self.human.favourite_pet))
+        assert field.new_value == json.dumps(self.human.favourite_pet)
 
     def test_update(self):
         self.human.age = 43
         self.human.save()
         human_event = TrackingEvent.objects.order_by('date').last()
-        self.assertEqual(human_event.fields.all().count(), 1)
+        assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='age')
-        self.assertEqual(field.old_value, json.dumps(42))
-        self.assertEqual(field.new_value, json.dumps(43))
+        assert field.old_value == json.dumps(42)
+        assert field.new_value == json.dumps(43)
 
     def test_foreign_key(self):
         self.human.favourite_pet = self.pet
         self.human.save()
         human_event = TrackingEvent.objects.order_by('date').last()
-        self.assertEqual(human_event.fields.all().count(), 1)
+        assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='favourite_pet')
-        self.assertEqual(field.old_value, json.dumps(None))
-        self.assertEqual(field.new_value, json.dumps(six.text_type(self.pet)))
+        assert field.old_value == json.dumps(None)
+        assert field.new_value == json.dumps(six.text_type(self.pet))
 
     def test_foreign_key_not_changed(self):
         """ Test a foreign key does not change if only other values change """
@@ -265,10 +265,10 @@ class TrackedFieldModificationTestCase(TestCase):
         self.human.name = "Toto"
         self.human.save()
         human_event = TrackingEvent.objects.order_by('date').last()
-        self.assertEqual(human_event.fields.all().count(), 1)
+        assert human_event.fields.all().count() == 1
         field = human_event.fields.first()
-        self.assertEqual(field.old_value, json.dumps("George"))
-        self.assertEqual(field.new_value, json.dumps("Toto"))
+        assert field.old_value == json.dumps("George")
+        assert field.new_value == json.dumps("Toto")
 
     def test_foreign_key_label(self):
         """ Test label of foreign keys are used in tracked fields """
@@ -277,79 +277,74 @@ class TrackedFieldModificationTestCase(TestCase):
         self.human.favourite_pet = self.pet2
         self.human.save()
         human_event = TrackingEvent.objects.order_by('date').last()
-        self.assertEqual(human_event.fields.all().count(), 1)
+        assert human_event.fields.all().count() == 1
         field = human_event.fields.first()
-        self.assertEqual(field.old_value, json.dumps(six.text_type(self.pet)))
-        self.assertEqual(field.new_value, json.dumps(six.text_type(self.pet2)))
+        assert field.old_value == json.dumps(six.text_type(self.pet))
+        assert field.new_value == json.dumps(six.text_type(self.pet2))
 
     def test_add(self):
         self.human.pets.add(self.pet2)
         human_event = TrackingEvent.objects.order_by('date').last()
-        self.assertEqual(human_event.fields.all().count(), 1)
+        assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='pets')
-        self.assertEqual(field.old_value,
-                         json.dumps([six.text_type(self.pet)]))
-        self.assertEqual(field.new_value, json.dumps([
+        assert field.old_value == json.dumps([six.text_type(self.pet)])
+        assert field.new_value == json.dumps([
             six.text_type(self.pet), six.text_type(self.pet2)
-        ]))
+        ])
 
     def test_add_reverse(self):
         self.pet2.human_set.add(self.human)
         human_event = TrackingEvent.objects.order_by('date').last()
-        self.assertEqual(human_event.fields.all().count(), 1)
+        assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='pets')
-        self.assertEqual(field.old_value,
-                         json.dumps([six.text_type(self.pet)]))
-        self.assertEqual(field.new_value, json.dumps([
+        assert field.old_value == json.dumps([six.text_type(self.pet)])
+        assert field.new_value == json.dumps([
             six.text_type(self.pet), six.text_type(self.pet2)
-        ]))
+        ])
 
     def test_remove(self):
         self.human.pets.add(self.pet2)
         self.human.pets.remove(self.pet2)
         human_event = TrackingEvent.objects.order_by('date').last()
-        self.assertEqual(human_event.fields.all().count(), 1)
+        assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='pets')
-        self.assertEqual(field.old_value, json.dumps([
+        assert field.old_value == json.dumps([
             six.text_type(self.pet), six.text_type(self.pet2)
-        ]))
-        self.assertEqual(field.new_value,
-                         json.dumps([six.text_type(self.pet)]))
+        ])
+        assert field.new_value == json.dumps([six.text_type(self.pet)])
 
     def test_remove_reverse(self):
         self.human.pets.add(self.pet2)
         self.pet2.human_set.remove(self.human)
         human_event = TrackingEvent.objects.order_by('date').last()
-        self.assertEqual(human_event.fields.all().count(), 1)
+        assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='pets')
-        self.assertEqual(field.old_value, json.dumps([
+        assert field.old_value == json.dumps([
             six.text_type(self.pet), six.text_type(self.pet2)
-        ]))
-        self.assertEqual(field.new_value,
-                         json.dumps([six.text_type(self.pet)]))
+        ])
+        assert field.new_value == json.dumps([six.text_type(self.pet)])
 
     def test_clear(self):
         self.human.pets.add(self.pet2)
         self.human.pets.clear()
         human_event = TrackingEvent.objects.order_by('date').last()
-        self.assertEqual(human_event.fields.all().count(), 1)
+        assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='pets')
-        self.assertEqual(field.old_value, json.dumps([
+        assert field.old_value == json.dumps([
             six.text_type(self.pet), six.text_type(self.pet2)
-        ]))
-        self.assertEqual(field.new_value, json.dumps([]))
+        ])
+        assert field.new_value == json.dumps([])
 
     def test_clear_reverse(self):
         self.human.pets.add(self.pet2)
         self.pet2.human_set.clear()
         human_event = TrackingEvent.objects.order_by('date').last()
-        self.assertEqual(human_event.fields.all().count(), 1)
+        assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='pets')
-        self.assertEqual(field.old_value, json.dumps([
+        assert field.old_value == json.dumps([
             six.text_type(self.pet), six.text_type(self.pet2)
-        ]))
-        self.assertEqual(field.new_value,
-                         json.dumps([six.text_type(self.pet)]))
+        ])
+        assert field.new_value == json.dumps([six.text_type(self.pet)])
 
     def test_date(self):
         today = datetime.date.today()
@@ -357,9 +352,8 @@ class TrackedFieldModificationTestCase(TestCase):
         self.human.save()
         human_event = TrackingEvent.objects.order_by('date').last()
         field = human_event.fields.get(field='birthday')
-        self.assertEqual(field.old_value, json.dumps(None))
-        self.assertEqual(field.new_value,
-                         json.dumps(today.strftime('%Y-%m-%d')))
+        assert field.old_value == json.dumps(None)
+        assert field.new_value == json.dumps(today.strftime('%Y-%m-%d'))
 
     def test_datetime(self):
         now = timezone.now()
@@ -367,9 +361,8 @@ class TrackedFieldModificationTestCase(TestCase):
         self.pet.save()
         pet_event = TrackingEvent.objects.order_by('date').last()
         field = pet_event.fields.get(field='vet_appointment')
-        self.assertEqual(field.old_value, json.dumps(None))
-        self.assertEqual(field.new_value,
-                         json.dumps(now.strftime('%Y-%m-%d %H:%M:%S')))
+        assert field.old_value == json.dumps(None)
+        assert field.new_value == json.dumps(now.strftime('%Y-%m-%d %H:%M:%S'))
 
     def test_imagefield(self):
         picture = File(
@@ -380,8 +373,8 @@ class TrackedFieldModificationTestCase(TestCase):
         self.pet.save()
         pet_event = TrackingEvent.objects.order_by('date').last()
         field = pet_event.fields.get(field='picture')
-        self.assertEqual(field.old_value, json.dumps(None))
-        self.assertEqual(field.new_value, json.dumps(self.pet.picture.path))
+        assert field.old_value == json.dumps(None)
+        assert field.new_value == json.dumps(self.pet.picture.path)
         self.pet.picture.delete()
 
 
@@ -396,26 +389,26 @@ class TrackingRelatedTestCase(TestCase):
         self.human.save()
         house_event = TrackingEvent.objects.filter(
             object_content_type=self.content_type)
-        self.assertEqual(house_event.count(), 1)
+        assert house_event.count() == 1
         house_event = house_event.last()
-        self.assertEqual(house_event.fields.count(), 1)
+        assert house_event.fields.count() == 1
         field = house_event.fields.last()
-        self.assertEqual(field.old_value, '"Toto"')
-        self.assertEqual(field.new_value, '"Tutu"')
-        self.assertEqual(field.field, 'tenant__name')
+        assert field.old_value == '"Toto"'
+        assert field.new_value == '"Tutu"'
+        assert field.field == 'tenant__name'
 
     def test_m2m_change(self):
         pet = Pet.objects.create(name="Pet", age=4)
         self.human.pets.add(pet)
         house_event = TrackingEvent.objects.filter(
             object_content_type=self.content_type)
-        self.assertEqual(house_event.count(), 1)
+        assert house_event.count() == 1
         house_event = house_event.last()
-        self.assertEqual(house_event.fields.count(), 1)
+        assert house_event.fields.count() == 1
         field = house_event.fields.last()
-        self.assertEqual(field.field, 'tenant__pets')
-        self.assertEqual(field.old_value, json.dumps([]))
-        self.assertEqual(field.new_value, json.dumps([six.text_type(pet)]))
+        assert field.field == 'tenant__pets'
+        assert field.old_value == json.dumps([])
+        assert field.new_value == json.dumps([six.text_type(pet)])
 
 
 class AdminModelTestCase(TestCase):

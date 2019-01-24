@@ -72,7 +72,7 @@ def _has_changed(instance):
             except TypeError:
                 # Can't compare old and new value, should be different.
                 return True
-        return False
+    return False
 
 
 def _has_changed_related(instance):
@@ -121,25 +121,25 @@ def _serialize_field(field):
     if isinstance(field, datetime.datetime):
         return json.dumps(
             field.strftime('%Y-%m-%d %H:%M:%S'), ensure_ascii=False
-        ).encode('utf8')
+        )
     if isinstance(field, datetime.date):
         return json.dumps(
             field.strftime('%Y-%m-%d'), ensure_ascii=False
-        ).encode('utf8')
+        )
     if isinstance(field, FieldFile):
         try:
-            return json.dumps(field.path, ensure_ascii=False).encode('utf8')
+            return json.dumps(field.path, ensure_ascii=False)
         except ValueError:
             # No file
-            return json.dumps(None, ensure_ascii=False).encode('utf8')
+            return json.dumps(None, ensure_ascii=False)
     if isinstance(field, Model):
         return json.dumps(six.text_type(field),
-                          ensure_ascii=False).encode('utf8')
+                          ensure_ascii=False)
     try:
-        return json.dumps(field, ensure_ascii=False).encode('utf8')
+        return json.dumps(field, ensure_ascii=False)
     except TypeError:
         logger.warning("Could not serialize field {0}".format(repr(field)))
-        return json.dumps(repr(field), ensure_ascii=False).encode('utf8')
+        return json.dumps(repr(field), ensure_ascii=False)
 
 
 def _create_tracked_field(event, instance, field, fieldname=None):
@@ -380,7 +380,7 @@ def tracking_m2m(
             action = 'pre_remove'
             # pk_set is None for clear events, we need to get objects' pk.
             field = _get_m2m_field(model, sender)
-            field = model._meta.get_field(field).related.get_accessor_name()
+            field = model._meta.get_field(field).remote_field.get_accessor_name()
             pk_set = set([obj.id for obj in getattr(instance, field).all()])
         # Create an event for each object being tracked
         for pk in pk_set:

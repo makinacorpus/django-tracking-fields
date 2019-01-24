@@ -54,6 +54,13 @@ ROOT_URLCONF = 'tracking_fields.tests.urls'
 WSGI_APPLICATION = 'tracking_fields.wsgi.application'
 
 
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
+    },
+]
+
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 
