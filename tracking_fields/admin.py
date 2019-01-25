@@ -68,7 +68,12 @@ class TrackerEventUserFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         qs = model_admin.get_queryset(request)
-        users = qs.values('user_content_type', 'user_id',)
+        users = (
+            qs
+            .values('user_content_type', 'user_id',)
+            .distinct('user_content_type', 'user_id')
+            .order_by('user_content_type', 'user_id')
+        )
         lookups = {}
         for user in users:
             if user['user_content_type'] is None:
