@@ -11,6 +11,11 @@ from django.db.models.fields.related import ForeignKey
 from django.utils import six
 
 try:
+    from xworkflows.base import StateWrapper
+except ImportError:
+    StateWrapper = type('StateWrapper')
+
+try:
     from cuser.middleware import CuserMiddleware
     CUSER = True
 except ImportError:
@@ -134,6 +139,9 @@ def _serialize_field(field):
             return json.dumps(None, ensure_ascii=False)
     if isinstance(field, Model):
         return json.dumps(six.text_type(field),
+                          ensure_ascii=False)
+    if isinstance(field, StateWrapper):
+        return json.dumps(field.name,
                           ensure_ascii=False)
     try:
         return json.dumps(field, ensure_ascii=False)
