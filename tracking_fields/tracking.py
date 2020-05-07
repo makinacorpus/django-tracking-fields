@@ -13,7 +13,7 @@ from django.utils import six
 try:
     from xworkflows.base import StateWrapper
 except ImportError:
-    StateWrapper = type('StateWrapper')
+    StateWrapper = type('StateWrapper', (object,), dict())
 
 try:
     from cuser.middleware import CuserMiddleware
