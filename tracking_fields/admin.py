@@ -97,7 +97,7 @@ class TrackedFieldModificationAdmin(admin.TabularInline):
     model = TrackedFieldModification
     readonly_fields = ('field', 'old_value', 'new_value',)
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None):
         return False
 
 
