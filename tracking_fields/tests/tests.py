@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.files import File
 from django.test import Client, TestCase
-from django.utils import six, timezone
+from django.utils import timezone
 from django.utils.html import escape
 
 from cuser.middleware import CuserMiddleware
@@ -256,7 +256,7 @@ class TrackedFieldModificationTestCase(TestCase):
         assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='favourite_pet')
         assert field.old_value == json.dumps(None)
-        assert field.new_value == json.dumps(six.text_type(self.pet))
+        assert field.new_value == json.dumps(str(self.pet))
 
     def test_foreign_key_not_changed(self):
         """ Test a foreign key does not change if only other values change """
@@ -279,17 +279,17 @@ class TrackedFieldModificationTestCase(TestCase):
         human_event = TrackingEvent.objects.order_by('date').last()
         assert human_event.fields.all().count() == 1
         field = human_event.fields.first()
-        assert field.old_value == json.dumps(six.text_type(self.pet))
-        assert field.new_value == json.dumps(six.text_type(self.pet2))
+        assert field.old_value == json.dumps(str(self.pet))
+        assert field.new_value == json.dumps(str(self.pet2))
 
     def test_add(self):
         self.human.pets.add(self.pet2)
         human_event = TrackingEvent.objects.order_by('date').last()
         assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='pets')
-        assert field.old_value == json.dumps([six.text_type(self.pet)])
+        assert field.old_value == json.dumps([str(self.pet)])
         assert field.new_value == json.dumps([
-            six.text_type(self.pet), six.text_type(self.pet2)
+            str(self.pet), str(self.pet2)
         ])
 
     def test_add_reverse(self):
@@ -297,9 +297,9 @@ class TrackedFieldModificationTestCase(TestCase):
         human_event = TrackingEvent.objects.order_by('date').last()
         assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='pets')
-        assert field.old_value == json.dumps([six.text_type(self.pet)])
+        assert field.old_value == json.dumps([str(self.pet)])
         assert field.new_value == json.dumps([
-            six.text_type(self.pet), six.text_type(self.pet2)
+            str(self.pet), str(self.pet2)
         ])
 
     def test_remove(self):
@@ -309,9 +309,9 @@ class TrackedFieldModificationTestCase(TestCase):
         assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='pets')
         assert field.old_value == json.dumps([
-            six.text_type(self.pet), six.text_type(self.pet2)
+            str(self.pet), str(self.pet2)
         ])
-        assert field.new_value == json.dumps([six.text_type(self.pet)])
+        assert field.new_value == json.dumps([str(self.pet)])
 
     def test_remove_reverse(self):
         self.human.pets.add(self.pet2)
@@ -320,9 +320,9 @@ class TrackedFieldModificationTestCase(TestCase):
         assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='pets')
         assert field.old_value == json.dumps([
-            six.text_type(self.pet), six.text_type(self.pet2)
+            str(self.pet), str(self.pet2)
         ])
-        assert field.new_value == json.dumps([six.text_type(self.pet)])
+        assert field.new_value == json.dumps([str(self.pet)])
 
     def test_clear(self):
         self.human.pets.add(self.pet2)
@@ -331,7 +331,7 @@ class TrackedFieldModificationTestCase(TestCase):
         assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='pets')
         assert field.old_value == json.dumps([
-            six.text_type(self.pet), six.text_type(self.pet2)
+            str(self.pet), str(self.pet2)
         ])
         assert field.new_value == json.dumps([])
 
@@ -342,9 +342,9 @@ class TrackedFieldModificationTestCase(TestCase):
         assert human_event.fields.all().count() == 1
         field = human_event.fields.get(field='pets')
         assert field.old_value == json.dumps([
-            six.text_type(self.pet), six.text_type(self.pet2)
+            str(self.pet), str(self.pet2)
         ])
-        assert field.new_value == json.dumps([six.text_type(self.pet)])
+        assert field.new_value == json.dumps([str(self.pet)])
 
     def test_date(self):
         today = datetime.date.today()
@@ -408,7 +408,7 @@ class TrackingRelatedTestCase(TestCase):
         field = house_event.fields.last()
         assert field.field == 'tenant__pets'
         assert field.old_value == json.dumps([])
-        assert field.new_value == json.dumps([six.text_type(pet)])
+        assert field.new_value == json.dumps([str(pet)])
 
 
 class AdminModelTestCase(TestCase):

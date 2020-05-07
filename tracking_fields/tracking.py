@@ -8,7 +8,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model, ManyToManyField
 from django.db.models.fields.files import FieldFile
 from django.db.models.fields.related import ForeignKey
-from django.utils import six
 
 try:
     from xworkflows.base import StateWrapper
@@ -138,7 +137,7 @@ def _serialize_field(field):
             # No file
             return json.dumps(None, ensure_ascii=False)
     if isinstance(field, Model):
-        return json.dumps(six.text_type(field),
+        return json.dumps(str(field),
                           ensure_ascii=False)
     if isinstance(field, StateWrapper):
         return json.dumps(field.name,
@@ -278,8 +277,8 @@ def _create_tracked_field_m2m(event, instance, field, objects, action,
         after = [obj for obj in before if obj not in objects]
     elif action == 'CLEAR':
         after = []
-    before = list(map(six.text_type, before))
-    after = list(map(six.text_type, after))
+    before = list(map(str, before))
+    after = list(map(str, after))
     return TrackedFieldModification.objects.create(
         event=event,
         field=fieldname,
