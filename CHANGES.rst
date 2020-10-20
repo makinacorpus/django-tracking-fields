@@ -5,7 +5,7 @@ Changelog
 1.2.1 (unreleased)
 ------------------
 
-*
+* Deferred fields are not tracked to avoid additional requests.
 
 1.2.0 (2020-05-07)
 ------------------

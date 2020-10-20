@@ -46,7 +46,9 @@ def _set_original_fields(instance):
                 original_fields[field] = getattr(instance,
                                                  '{0}_id'.format(field))
             else:
-                original_fields[field] = getattr(instance, field)
+                # Do not store deferred fields
+                if field in instance.__dict__:
+                    original_fields[field] = getattr(instance, field)
 
     for field in getattr(instance, '_tracked_fields', []):
         _set_original_field(instance, field)
