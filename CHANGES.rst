@@ -2,7 +2,7 @@
 Changelog
 =========
 
-1.2.1 (unreleased)
+1.2.1 (2020-10-20)
 ------------------
 
 * Deferred fields are not tracked to avoid additional requests.
