@@ -82,6 +82,11 @@ class TrackingEvent(models.Model):
         verbose_name_plural = _('Tracking events')
         ordering = ['-date']
 
+    def get_object_model(self):
+        if self.object_id is None:
+            return None
+        return self.object._meta.model
+
 
 class TrackedFieldModification(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
