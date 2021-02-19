@@ -5,7 +5,9 @@ Changelog
 1.2.2 (unreleased)
 ------------------
 
-*
+* Added `get_object_model` on `TrackingEvent` to be able to get model class in templates.
+* Fix deprecation warnings for Django 4.0.
+* Drop support for Django 2.0 and 2.1.
 
 1.2.1 (2020-10-20)
 ------------------
