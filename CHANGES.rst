@@ -2,7 +2,7 @@
 Changelog
 =========
 
-1.2.2 (unreleased)
+1.3.0 (2021-02-19)
 ------------------
 
 * Added `get_object_model` on `TrackingEvent` to be able to get model class in templates.
