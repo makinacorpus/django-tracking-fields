@@ -132,4 +132,5 @@ class TrackingEventAdmin(admin.ModelAdmin):
         return super(TrackingEventAdmin, self).changelist_view(
             request, extra_context)
 
+
 admin.site.register(TrackingEvent, TrackingEventAdmin)

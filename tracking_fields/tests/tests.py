@@ -65,7 +65,7 @@ class TrackingEventTestCase(TestCase):
         assert human_event.action == UPDATE
         assert human_event.object == self.human
         assert human_event.object_repr == self.human_repr
-        assert human_event.user == None
+        assert human_event.user is None
         assert human_event.user_repr == 'None'
         tracking.CUSER = True
 
@@ -95,7 +95,7 @@ class TrackingEventTestCase(TestCase):
         human_event = events.last()
         assert human_event.date is not None
         assert human_event.action == DELETE
-        assert human_event.object == None  # Object is deleted
+        assert human_event.object is None  # Object is deleted
         assert human_event.object_repr == self.human_repr
         assert human_event.user == self.user
         assert human_event.user_repr == self.user_repr

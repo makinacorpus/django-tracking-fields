@@ -8,7 +8,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
-# This settings file is used to generated migrations
+# This settings file is used to generate migrations
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
