@@ -9,6 +9,7 @@ pytest-cov
 flake8
 flake8-tidy-imports
 pycodestyle
-
+coveralls
+argparse
 # Sort and lint imports
 isort
