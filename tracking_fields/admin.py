@@ -1,7 +1,8 @@
+from urllib.parse import quote
+
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
-from django.utils.http import urlquote
 from django.utils.translation import gettext_lazy as _
 
 from tracking_fields.models import TrackingEvent, TrackedFieldModification
@@ -25,7 +26,7 @@ class TrackedObjectMixinAdmin(admin.ModelAdmin):
                 app_label=opts.app_label,
                 model=opts.model_name,
             )
-            extra_context['tracking_value'] = urlquote(u'{0}:{1}'.format(
+            extra_context['tracking_value'] = quote(u'{0}:{1}'.format(
                 content_type.pk, object_id
             ))
         return super(TrackedObjectMixinAdmin, self).change_view(
