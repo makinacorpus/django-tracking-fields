@@ -2,10 +2,10 @@
 Changelog
 =========
 
-1.3.1 (unreleased)
+1.3.1 (2021-02-19)
 ------------------
 
-*
+* Added `get_object_model_verbose_name`.
 
 1.3.0 (2021-02-19)
 ------------------

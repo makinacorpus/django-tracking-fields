@@ -87,6 +87,11 @@ class TrackingEvent(models.Model):
             return None
         return self.object._meta.model
 
+    def get_object_model_verbose_name(self):
+        if self.object_id is None:
+            return None
+        return self.object._meta.verbose_name
+
 
 class TrackedFieldModification(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
