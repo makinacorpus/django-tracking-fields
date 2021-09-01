@@ -2,10 +2,10 @@
 Changelog
 =========
 
-1.3.2 (unreleased)
+1.3.2 (2021-09-01)
 ------------------
 
-*
+* Fix related event when there is no backward relation.
 
 1.3.1 (2021-02-19)
 ------------------
