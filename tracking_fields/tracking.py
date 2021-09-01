@@ -229,6 +229,8 @@ def _create_update_tracking_related_event(instance):
 
     # Create the events from the events dict
     for related_field, fields in events.items():
+        if related_field[1] == '+':
+            continue
         try:
             related_instances = getattr(instance, related_field[1])
         except ObjectDoesNotExist:
