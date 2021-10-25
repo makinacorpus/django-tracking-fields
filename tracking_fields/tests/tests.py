@@ -16,7 +16,7 @@ from cuser.middleware import CuserMiddleware
 from tracking_fields.models import (
     TrackingEvent, CREATE, UPDATE, DELETE, ADD, REMOVE, CLEAR,
 )
-from tracking_fields.tests.models import Human, Pet, House
+from tracking_fields.tests.models import Human, Pet, House, UuidModel
 
 
 class TrackingEventTestCase(TestCase):
@@ -483,3 +483,9 @@ class AdminModelTestCase(TestCase):
             response,
             ' class="historylink">',
         )
+
+    def test_track_uuid_model(self):
+        model = UuidModel.objects.create(value="foobar")
+        model.value = "toto"
+        model.save()
+        model.delete()

@@ -5,7 +5,7 @@ Changelog
 1.3.3 (unreleased)
 ------------------
 
-*
+* Fix tracking of models with uuid ids
 
 1.3.2 (2021-09-01)
 ------------------

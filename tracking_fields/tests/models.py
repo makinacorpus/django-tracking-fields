@@ -1,6 +1,16 @@
+import uuid
+
 from django.db import models
 
 from tracking_fields.decorators import track
+
+@track('value')
+class UuidModel(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    value = models.CharField(max_length=30)
+
+    def __unicode__(self):
+        return u'{0}'.format(self.value)
 
 
 @track('vet_appointment', 'name', 'age', 'picture')

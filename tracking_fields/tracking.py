@@ -4,6 +4,7 @@ import datetime
 import json
 import logging
 
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model, ManyToManyField
 from django.db.models.fields.files import FieldFile
@@ -116,7 +117,8 @@ def _create_event(instance, action):
             user = None
     return TrackingEvent.objects.create(
         action=action,
-        object=instance,
+        object_content_type=ContentType.objects.get_for_model(instance),
+        object_id=instance.pk if isinstance(instance.pk, int) else None,
         object_repr=repr(instance),
         user=user,
         user_repr=user_repr,
