@@ -2,7 +2,7 @@
 Changelog
 =========
 
-1.3.3 (unreleased)
+1.3.3 (2021-10-25)
 ------------------
 
 * Fix tracking of models with uuid ids

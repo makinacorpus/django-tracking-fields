@@ -13,7 +13,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-tracking-fields',
-    version='1.3.3dev',
+    version='1.3.3',
     packages=find_packages(),
     include_package_data=True,
     license='GPLv3+',
