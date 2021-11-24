@@ -153,7 +153,7 @@ def _serialize_field(field):
         return json.dumps(repr(field), ensure_ascii=False)
 
 
-def _create_tracked_field(event, instance, field, fieldname=None):
+def _build_tracked_field(event, instance, field, fieldname=None):
     """
     Create a TrackedFieldModification for the instance.
 
@@ -173,7 +173,7 @@ def _create_tracked_field(event, instance, field, fieldname=None):
             old_value = None
     else:
         old_value = instance._original_fields[field]
-    return TrackedFieldModification.objects.create(
+    return TrackedFieldModification(
         event=event,
         field=fieldname,
         old_value=_serialize_field(old_value),
@@ -186,9 +186,12 @@ def _create_create_tracking_event(instance):
     Create a TrackingEvent and TrackedFieldModification for a CREATE event.
     """
     event = _create_event(instance, CREATE)
-    for field in instance._tracked_fields:
-        if not isinstance(instance._meta.get_field(field), ManyToManyField):
-            _create_tracked_field(event, instance, field)
+    tracked_fields = [
+        _build_tracked_field(event, instance, field)
+        for field in instance._tracked_fields
+        if not isinstance(instance._meta.get_field(field), ManyToManyField)
+    ]
+    TrackedFieldModification.objects.bulk_create(tracked_fields)
 
 
 def _create_update_tracking_event(instance):
@@ -196,6 +199,7 @@ def _create_update_tracking_event(instance):
     Create a TrackingEvent and TrackedFieldModification for an UPDATE event.
     """
     event = _create_event(instance, UPDATE)
+    tracked_fields = []
     for field in instance._tracked_fields:
         if not isinstance(instance._meta.get_field(field), ManyToManyField):
             try:
@@ -205,10 +209,11 @@ def _create_update_tracking_event(instance):
                 else:
                     value = getattr(instance, field)
                 if instance._original_fields[field] != value:
-                    _create_tracked_field(event, instance, field)
+                    tracked_fields.append(_build_tracked_field(event, instance, field))
             except TypeError:
                 # Can't compare old and new value, should be different.
-                _create_tracked_field(event, instance, field)
+                tracked_fields.append(_build_tracked_field(event, instance, field))
+    TrackedFieldModification.objects.bulk_create(tracked_fields)
 
 
 def _create_update_tracking_related_event(instance):
@@ -230,6 +235,7 @@ def _create_update_tracking_related_event(instance):
                     events.setdefault(related_field, []).append(field)
 
     # Create the events from the events dict
+    tracked_fields = []
     for related_field, fields in events.items():
         if related_field[1] == '+':
             continue
@@ -247,9 +253,10 @@ def _create_update_tracking_related_event(instance):
             event = _create_event(related_instance, UPDATE)
             for field in fields:
                 fieldname = '{0}__{1}'.format(related_field[0], field)
-                _create_tracked_field(
+                tracked_fields.append(_build_tracked_field(
                     event, instance, field, fieldname=fieldname
-                )
+                ))
+    TrackedFieldModification.objects.bulk_create(tracked_fields)
 
 
 def _create_delete_tracking_event(instance):
@@ -273,7 +280,7 @@ def _get_m2m_field(model, sender):
                 return field
 
 
-def _create_tracked_field_m2m(event, instance, field, objects, action,
+def _build_tracked_field_m2m(event, instance, field, objects, action,
                               fieldname=None):
     fieldname = fieldname or field
     before = list(getattr(instance, field).all())
@@ -285,7 +292,7 @@ def _create_tracked_field_m2m(event, instance, field, objects, action,
         after = []
     before = list(map(str, before))
     after = list(map(str, after))
-    return TrackedFieldModification.objects.create(
+    return TrackedFieldModification(
         event=event,
         field=fieldname,
         old_value=json.dumps(before),
@@ -308,6 +315,7 @@ def _create_tracked_event_m2m(model, instance, sender, objects, action):
     :param objects: The list of objects being added/removed.
     :param action: The action from the m2m_changed signal.
     """
+    tracked_fields = []
     field = _get_m2m_field(model, sender)
     if field in getattr(model, '_tracked_related_fields', {}).keys():
         # In case of a m2m tracked on a related model
@@ -325,12 +333,13 @@ def _create_tracked_event_m2m(model, instance, sender, objects, action):
             for related_instance in related_instances:
                 event = _create_event(related_instance, action)
                 fieldname = '{0}__{1}'.format(related_field[0], field)
-                _create_tracked_field_m2m(
+                tracked_fields.append(_build_tracked_field_m2m(
                     event, instance, field, objects, action, fieldname
-                )
+                ))
     if field in getattr(model, '_tracked_fields', []):
         event = _create_event(instance, action)
-        _create_tracked_field_m2m(event, instance, field, objects, action)
+        tracked_fields.append(_build_tracked_field_m2m(event, instance, field, objects, action))
+    TrackedFieldModification.objects.bulk_create(tracked_fields)
 
 
 # ======================= CALLBACKS ====================
@@ -376,7 +385,7 @@ def tracking_m2m(
     m2m_changed callback.
     The idea is to get the model and the instance of the object being tracked,
     and the different objects being added/removed. It is then send to the
-    ``_create_tracked_field_m2m`` method to extract the proper attribute for
+    ``_build_tracked_field_m2m`` method to extract the proper attribute for
     the TrackedFieldModification.
     """
     action_event = {
