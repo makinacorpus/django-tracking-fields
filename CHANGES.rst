@@ -2,7 +2,7 @@
 Changelog
 =========
 
-1.3.4 (unreleased)
+1.3.4 (2021-11-24)
 ------------------
 
 * Bulk create TrackedFieldModification
