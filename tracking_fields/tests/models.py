@@ -4,6 +4,7 @@ from django.db import models
 
 from tracking_fields.decorators import track
 
+
 @track('value')
 class UuidModel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

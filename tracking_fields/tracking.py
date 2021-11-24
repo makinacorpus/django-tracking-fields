@@ -281,7 +281,7 @@ def _get_m2m_field(model, sender):
 
 
 def _build_tracked_field_m2m(event, instance, field, objects, action,
-                              fieldname=None):
+                             fieldname=None):
     fieldname = fieldname or field
     before = list(getattr(instance, field).all())
     if action == 'ADD':
