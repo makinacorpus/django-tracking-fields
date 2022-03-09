@@ -102,7 +102,7 @@ class TrackedFieldModification(models.Model):
         on_delete=models.CASCADE,
     )
 
-    field = models.CharField(_("Field"), max_length=40, editable=False)
+    field = models.CharField(_("Field"), max_length=250, editable=False)
 
     old_value = models.TextField(
         _("Old value"),
