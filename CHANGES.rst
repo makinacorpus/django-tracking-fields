@@ -2,7 +2,7 @@
 Changelog
 =========
 
-1.3.5 (unreleased)
+1.3.5 (2022-03-09)
 ------------------
 
 * Increase max_length of TrackedFieldModification.field from 40 to 250
