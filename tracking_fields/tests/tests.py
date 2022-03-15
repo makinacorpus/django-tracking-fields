@@ -409,16 +409,78 @@ class TrackingRelatedTestCase(TestCase):
 
 
 class AdminModelTestCase(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_superuser('admin', '', 'password')
-        self.c = Client()
-        self.c.login(username="admin", password="password")
-        CuserMiddleware.set_user(self.user)
-        self.human = Human.objects.create(name="George", age=42, height=175)
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_superuser("admin", "", "password")
+        cls.c = Client()
+        cls.c.login(username="admin", password="password")
+        CuserMiddleware.set_user(cls.user)
+        cls.human = Human.objects.create(name="George", age=42, height=175)
+
+    def test_tracker_event_user_filter_with_incorrect_user(self):
+        """Test the admin view listing all objects given an incorrect tracking event"""
+        user_content_type = ContentType.objects.get_for_model(User)
+        TrackingEvent.objects.create(
+            action="UPDATE",
+            object=self.human,
+            object_repr=repr(self.human),
+            user_content_type=user_content_type,
+            user_id=999999,
+            user_repr="",
+        )
+        response = self.c.get("/admin/tracking_fields/trackingevent/")
+        self.assertContains(
+            response,
+            escape(repr(self.human)),
+        )
 
     def test_list(self):
-        """ Test the admin view listing all objects. """
+        """Test the admin view listing all objects."""
         response = self.c.get('/admin/tracking_fields/trackingevent/')
+        self.assertContains(
+            response,
+            escape(repr(self.human)),
+        )
+
+    def test_list_with_filter(self):
+        """Test the admin view listing all objects with correct filter."""
+        user_content_type = ContentType.objects.get_for_model(User)
+        response = self.c.get(
+            f"/admin/tracking_fields/trackingevent/"
+            f"?user={user_content_type.id}:{self.user.id}"
+        )
+        self.assertContains(
+            response,
+            escape(repr(self.human)),
+        )
+
+    def test_list_with_incorrect_filter_on_user_content_type(self):
+        """Test the admin view listing all objects with incorrect user content type
+        filter."""
+        response = self.c.get(
+            f"/admin/tracking_fields/trackingevent/"
+            f"?user=99999:{self.user.id}"
+        )
+        self.assertNotContains(
+            response,
+            escape(repr(self.human)),
+        )
+
+    def test_list_with_incorrect_filter_on_user_id(self):
+        """Test the admin view listing all objects with incorrect user id filter."""
+        user_content_type = ContentType.objects.get_for_model(User)
+        response = self.c.get(
+            f"/admin/tracking_fields/trackingevent/"
+            f"?user={user_content_type.id}:99999"
+        )
+        self.assertNotContains(
+            response,
+            escape(repr(self.human)),
+        )
+
+    def test_list_with_incorrect_filter(self):
+        """Test the admin view listing all objects with incorrect filter."""
+        response = self.c.get("/admin/tracking_fields/trackingevent/?user=foobar")
         self.assertContains(
             response,
             escape(repr(self.human)),
