@@ -11,5 +11,6 @@ flake8-tidy-imports
 pycodestyle
 coveralls
 argparse
+black
 # Sort and lint imports
 isort
