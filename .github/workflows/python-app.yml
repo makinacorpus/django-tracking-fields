@@ -55,6 +55,12 @@ jobs:
         pip install -e .
         pip install -U -r dev-requirements.txt
         pip install -U Django~=${{ matrix.django_version }}
+    - name: isort
+      run: |
+        isort tracking_fields --profile black --skip migrations
+    - name: Lint with black
+      run: |
+        black tracking_fields --exclude "migrations"
     - name: Lint with flake8
       run: |
         flake8 --ignore=E501,W504 tracking_fields
