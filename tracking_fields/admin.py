@@ -2,6 +2,7 @@ from urllib.parse import quote
 
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 
@@ -76,21 +77,26 @@ class TrackerEventUserFilter(admin.SimpleListFilter):
             value = u'{0}:{1}'.format(
                 user['user_content_type'], user['user_id']
             )
-            user_obj = (
-                ContentType.objects.get_for_id(user['user_content_type'])
-                .get_object_for_this_type(pk=user['user_id'])
-            )
-            lookups[value] = getattr(user_obj, 'username', str(user_obj))
+            try:
+                user_obj = (
+                    ContentType.objects.get_for_id(user['user_content_type'])
+                    .get_object_for_this_type(pk=user['user_id'])
+                )
+                lookups[value] = getattr(user_obj, 'username', str(user_obj))
+            except ObjectDoesNotExist:
+                lookups[value] = f"<id={user['user_id']}>"
         return [(lookup[0], lookup[1]) for lookup in lookups.items()]
 
     def queryset(self, request, queryset):
         if self.value() is None:
             return queryset
         value = self.value().split(':')
-        return queryset.filter(
-            user_content_type_id=value[0],
-            user_id=value[1]
-        )
+        if len(value) == 2:
+            return queryset.filter(
+                user_content_type_id=value[0],
+                user_id=value[1]
+            )
+        return queryset
 
 
 class TrackedFieldModificationAdmin(admin.TabularInline):
