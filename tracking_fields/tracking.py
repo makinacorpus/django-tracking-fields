@@ -13,10 +13,11 @@ from django.db.models.fields.related import ForeignKey
 try:
     from xworkflows.base import StateWrapper
 except ImportError:
-    StateWrapper = type('StateWrapper', (object,), dict())
+    StateWrapper = type("StateWrapper", (object,), dict())
 
 try:
     from cuser.middleware import CuserMiddleware
+
     CUSER = True
 except ImportError:
     CUSER = False
@@ -34,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 # ======================= HELPERS ====================
 
+
 def _set_original_fields(instance):
     """
     Save fields value, only for non-m2m fields.
@@ -47,21 +49,20 @@ def _set_original_fields(instance):
             if isinstance(instance._meta.get_field(field), ForeignKey):
                 # Only get the PK, we don't want to get the object
                 # (which would make an additional request)
-                original_fields[field] = getattr(instance,
-                                                 '{0}_id'.format(field))
+                original_fields[field] = getattr(instance, "{0}_id".format(field))
             else:
                 # Do not store deferred fields
                 if field in instance.__dict__:
                     original_fields[field] = getattr(instance, field)
 
-    for field in getattr(instance, '_tracked_fields', []):
+    for field in getattr(instance, "_tracked_fields", []):
         _set_original_field(instance, field)
-    for field in getattr(instance, '_tracked_related_fields', {}).keys():
+    for field in getattr(instance, "_tracked_related_fields", {}).keys():
         _set_original_field(instance, field)
 
     instance._original_fields = original_fields
     # Include pk to detect the creation of an object
-    instance._original_fields['pk'] = instance.pk
+    instance._original_fields["pk"] = instance.pk
 
 
 def _has_changed(instance):
@@ -69,12 +70,13 @@ def _has_changed(instance):
     Check if some tracked fields have changed
     """
     for field, value in instance._original_fields.items():
-        if field != 'pk' and \
-           not isinstance(instance._meta.get_field(field), ManyToManyField):
+        if field != "pk" and not isinstance(
+            instance._meta.get_field(field), ManyToManyField
+        ):
             try:
-                if field in getattr(instance, '_tracked_fields', []):
+                if field in getattr(instance, "_tracked_fields", []):
                     if isinstance(instance._meta.get_field(field), ForeignKey):
-                        if getattr(instance, '{0}_id'.format(field)) != value:
+                        if getattr(instance, "{0}_id".format(field)) != value:
                             return True
                     else:
                         if getattr(instance, field) != value:
@@ -89,17 +91,14 @@ def _has_changed_related(instance):
     """
     Check if some related tracked fields have changed
     """
-    tracked_related_fields = getattr(
-        instance,
-        '_tracked_related_fields',
-        {}
-    ).keys()
+    tracked_related_fields = getattr(instance, "_tracked_related_fields", {}).keys()
     for field, value in instance._original_fields.items():
-        if field != 'pk' and \
-           not isinstance(instance._meta.get_field(field), ManyToManyField):
+        if field != "pk" and not isinstance(
+            instance._meta.get_field(field), ManyToManyField
+        ):
             if field in tracked_related_fields:
                 if isinstance(instance._meta.get_field(field), ForeignKey):
-                    if getattr(instance, '{0}_id'.format(field)) != value:
+                    if getattr(instance, "{0}_id".format(field)) != value:
                         return True
                 else:
                     if getattr(instance, field) != value:
@@ -130,13 +129,9 @@ def _create_event(instance, action):
 
 def _serialize_field(field):
     if isinstance(field, datetime.datetime):
-        return json.dumps(
-            field.strftime('%Y-%m-%d %H:%M:%S'), ensure_ascii=False
-        )
+        return json.dumps(field.strftime("%Y-%m-%d %H:%M:%S"), ensure_ascii=False)
     if isinstance(field, datetime.date):
-        return json.dumps(
-            field.strftime('%Y-%m-%d'), ensure_ascii=False
-        )
+        return json.dumps(field.strftime("%Y-%m-%d"), ensure_ascii=False)
     if isinstance(field, FieldFile):
         try:
             return json.dumps(field.path, ensure_ascii=False)
@@ -144,11 +139,9 @@ def _serialize_field(field):
             # No file
             return json.dumps(None, ensure_ascii=False)
     if isinstance(field, Model):
-        return json.dumps(str(field),
-                          ensure_ascii=False)
+        return json.dumps(str(field), ensure_ascii=False)
     if isinstance(field, StateWrapper):
-        return json.dumps(field.name,
-                          ensure_ascii=False)
+        return json.dumps(field.name, ensure_ascii=False)
     try:
         return json.dumps(field, ensure_ascii=False)
     except TypeError:
@@ -180,7 +173,7 @@ def _build_tracked_field(event, instance, field, fieldname=None):
         event=event,
         field=fieldname,
         old_value=_serialize_field(old_value),
-        new_value=_serialize_field(getattr(instance, field))
+        new_value=_serialize_field(getattr(instance, field)),
     )
 
 
@@ -208,7 +201,7 @@ def _create_update_tracking_event(instance):
             try:
                 if isinstance(instance._meta.get_field(field), ForeignKey):
                     # Compare pk
-                    value = getattr(instance, '{0}_id'.format(field))
+                    value = getattr(instance, "{0}_id".format(field))
                 else:
                     value = getattr(instance, field)
                 if instance._original_fields[field] != value:
@@ -230,7 +223,7 @@ def _create_update_tracking_related_event(instance):
         if not isinstance(instance._meta.get_field(field), ManyToManyField):
             if isinstance(instance._meta.get_field(field), ForeignKey):
                 # Compare pk
-                value = getattr(instance, '{0}_id'.format(field))
+                value = getattr(instance, "{0}_id".format(field))
             else:
                 value = getattr(instance, field)
             if instance._original_fields[field] != value:
@@ -240,7 +233,7 @@ def _create_update_tracking_related_event(instance):
     # Create the events from the events dict
     tracked_fields = []
     for related_field, fields in events.items():
-        if related_field[1] == '+':
+        if related_field[1] == "+":
             continue
         try:
             related_instances = getattr(instance, related_field[1])
@@ -248,17 +241,17 @@ def _create_update_tracking_related_event(instance):
             continue
 
         # FIXME: isinstance(related_instances, RelatedManager ?)
-        if hasattr(related_instances, 'all'):
+        if hasattr(related_instances, "all"):
             related_instances = related_instances.all()
         else:
             related_instances = [related_instances]
         for related_instance in related_instances:
             event = _create_event(related_instance, UPDATE)
             for field in fields:
-                fieldname = '{0}__{1}'.format(related_field[0], field)
-                tracked_fields.append(_build_tracked_field(
-                    event, instance, field, fieldname=fieldname
-                ))
+                fieldname = "{0}__{1}".format(related_field[0], field)
+                tracked_fields.append(
+                    _build_tracked_field(event, instance, field, fieldname=fieldname)
+                )
     TrackedFieldModification.objects.bulk_create(tracked_fields)
 
 
@@ -273,25 +266,24 @@ def _get_m2m_field(model, sender):
     """
     Get the field name from a model and a sender from m2m_changed signal.
     """
-    for field in getattr(model, '_tracked_fields', []):
+    for field in getattr(model, "_tracked_fields", []):
         if isinstance(model._meta.get_field(field), ManyToManyField):
             if getattr(model, field).through == sender:
                 return field
-    for field in getattr(model, '_tracked_related_fields', {}).keys():
+    for field in getattr(model, "_tracked_related_fields", {}).keys():
         if isinstance(model._meta.get_field(field), ManyToManyField):
             if getattr(model, field).through == sender:
                 return field
 
 
-def _build_tracked_field_m2m(event, instance, field, objects, action,
-                             fieldname=None):
+def _build_tracked_field_m2m(event, instance, field, objects, action, fieldname=None):
     fieldname = fieldname or field
     before = list(getattr(instance, field).all())
-    if action == 'ADD':
+    if action == "ADD":
         after = before + objects
-    elif action == 'REMOVE':
+    elif action == "REMOVE":
         after = [obj for obj in before if obj not in objects]
-    elif action == 'CLEAR':
+    elif action == "CLEAR":
         after = []
     before = list(map(str, before))
     after = list(map(str, after))
@@ -299,7 +291,7 @@ def _build_tracked_field_m2m(event, instance, field, objects, action,
         event=event,
         field=fieldname,
         old_value=json.dumps(before),
-        new_value=json.dumps(after)
+        new_value=json.dumps(after),
     )
 
 
@@ -320,7 +312,7 @@ def _create_tracked_event_m2m(model, instance, sender, objects, action):
     """
     tracked_fields = []
     field = _get_m2m_field(model, sender)
-    if field in getattr(model, '_tracked_related_fields', {}).keys():
+    if field in getattr(model, "_tracked_related_fields", {}).keys():
         # In case of a m2m tracked on a related model
         related_fields = model._tracked_related_fields[field]
         for related_field in related_fields:
@@ -329,23 +321,28 @@ def _create_tracked_event_m2m(model, instance, sender, objects, action):
             except ObjectDoesNotExist:
                 continue
             # FIXME: isinstance(related_instances, RelatedManager ?)
-            if hasattr(related_instances, 'all'):
+            if hasattr(related_instances, "all"):
                 related_instances = related_instances.all()
             else:
                 related_instances = [related_instances]
             for related_instance in related_instances:
                 event = _create_event(related_instance, action)
-                fieldname = '{0}__{1}'.format(related_field[0], field)
-                tracked_fields.append(_build_tracked_field_m2m(
-                    event, instance, field, objects, action, fieldname
-                ))
-    if field in getattr(model, '_tracked_fields', []):
+                fieldname = "{0}__{1}".format(related_field[0], field)
+                tracked_fields.append(
+                    _build_tracked_field_m2m(
+                        event, instance, field, objects, action, fieldname
+                    )
+                )
+    if field in getattr(model, "_tracked_fields", []):
         event = _create_event(instance, action)
-        tracked_fields.append(_build_tracked_field_m2m(event, instance, field, objects, action))
+        tracked_fields.append(
+            _build_tracked_field_m2m(event, instance, field, objects, action)
+        )
     TrackedFieldModification.objects.bulk_create(tracked_fields)
 
 
 # ======================= CALLBACKS ====================
+
 
 def tracking_init(sender, instance, **kwargs):
     """
@@ -360,7 +357,7 @@ def tracking_save(sender, instance, raw, using, update_fields, **kwargs):
     We need post_save to have the object for a create.
     """
     if _has_changed(instance):
-        if instance._original_fields['pk'] is None:
+        if instance._original_fields["pk"] is None:
             # Create
             _create_create_tracking_event(instance)
         else:
@@ -381,9 +378,7 @@ def tracking_delete(sender, instance, using, **kwargs):
     _create_delete_tracking_event(instance)
 
 
-def tracking_m2m(
-        sender, instance, action, reverse, model, pk_set, using, **kwargs
-):
+def tracking_m2m(sender, instance, action, reverse, model, pk_set, using, **kwargs):
     """
     m2m_changed callback.
     The idea is to get the model and the instance of the object being tracked,
@@ -392,17 +387,17 @@ def tracking_m2m(
     the TrackedFieldModification.
     """
     action_event = {
-        'pre_clear': 'CLEAR',
-        'pre_add': 'ADD',
-        'pre_remove': 'REMOVE',
+        "pre_clear": "CLEAR",
+        "pre_add": "ADD",
+        "pre_remove": "REMOVE",
     }
-    if (action not in action_event.keys()):
+    if action not in action_event.keys():
         return
     if reverse:
-        if action == 'pre_clear':
+        if action == "pre_clear":
             # It will actually be a remove of ``instance`` on every
             # tracked object being related
-            action = 'pre_remove'
+            action = "pre_remove"
             # pk_set is None for clear events, we need to get objects' pk.
             field = _get_m2m_field(model, sender)
             field = model._meta.get_field(field).remote_field.get_accessor_name()
