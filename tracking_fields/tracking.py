@@ -6,7 +6,7 @@ import logging
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Model, ManyToManyField
+from django.db.models import ManyToManyField, Model
 from django.db.models.fields.files import FieldFile
 from django.db.models.fields.related import ForeignKey
 
@@ -22,8 +22,11 @@ except ImportError:
     CUSER = False
 
 from tracking_fields.models import (
-    TrackingEvent, TrackedFieldModification,
-    CREATE, UPDATE, DELETE
+    CREATE,
+    DELETE,
+    UPDATE,
+    TrackedFieldModification,
+    TrackingEvent,
 )
 
 logger = logging.getLogger(__name__)

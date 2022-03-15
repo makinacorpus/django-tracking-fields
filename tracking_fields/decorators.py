@@ -1,14 +1,15 @@
 from __future__ import unicode_literals
 
 from django.contrib.contenttypes.models import ContentType
-from django.urls import reverse
 from django.db.models import ManyToManyField
-from django.db.models.signals import (
-    post_init, post_save, pre_delete, m2m_changed
-)
+from django.db.models.signals import m2m_changed, post_init, post_save, pre_delete
+from django.urls import reverse
 
 from tracking_fields.tracking import (
-    tracking_init, tracking_save, tracking_delete, tracking_m2m
+    tracking_delete,
+    tracking_init,
+    tracking_m2m,
+    tracking_save,
 )
 
 

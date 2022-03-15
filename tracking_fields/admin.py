@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 
-from tracking_fields.models import TrackingEvent, TrackedFieldModification
+from tracking_fields.models import TrackedFieldModification, TrackingEvent
 
 
 class TrackedObjectMixinAdmin(admin.ModelAdmin):

@@ -6,9 +6,11 @@ try:
     from django.contrib.contenttypes.fields import GenericForeignKey
 except ImportError:
     from django.contrib.contenttypes.generic import GenericForeignKey
+
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import gettext_lazy as _, pgettext_lazy
 from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext_lazy
 
 # Used for object modifications
 CREATE = 'CREATE'

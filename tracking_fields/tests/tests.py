@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import datetime
 import json
 
+from cuser.middleware import CuserMiddleware
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.files import File
@@ -11,12 +12,16 @@ from django.test import Client, TestCase
 from django.utils import timezone
 from django.utils.html import escape
 
-from cuser.middleware import CuserMiddleware
-
 from tracking_fields.models import (
-    TrackingEvent, CREATE, UPDATE, DELETE, ADD, REMOVE, CLEAR,
+    ADD,
+    CLEAR,
+    CREATE,
+    DELETE,
+    REMOVE,
+    UPDATE,
+    TrackingEvent,
 )
-from tracking_fields.tests.models import Human, Pet, House, UuidModel
+from tracking_fields.tests.models import House, Human, Pet, UuidModel
 
 
 class TrackingEventTestCase(TestCase):
