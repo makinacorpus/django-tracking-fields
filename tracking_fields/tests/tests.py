@@ -365,17 +365,14 @@ class TrackedFieldModificationTestCase(TestCase):
         assert field.new_value == json.dumps(now.strftime('%Y-%m-%d %H:%M:%S'))
 
     def test_imagefield(self):
-        picture = File(
-            open('tracking_fields/tests/__init__.py'),
-            'picture.png',
-        )
-        self.pet.picture = picture
-        self.pet.save()
-        pet_event = TrackingEvent.objects.order_by('date').last()
-        field = pet_event.fields.get(field='picture')
-        assert field.old_value == json.dumps(None)
-        assert field.new_value == json.dumps(self.pet.picture.path)
-        self.pet.picture.delete()
+        with File(open('tracking_fields/tests/__init__.py'), 'picture.png') as picture:
+            self.pet.picture = picture
+            self.pet.save()
+            pet_event = TrackingEvent.objects.order_by('date').last()
+            field = pet_event.fields.get(field='picture')
+            assert field.old_value == json.dumps(None)
+            assert field.new_value == json.dumps(self.pet.picture.path)
+            self.pet.picture.delete()
 
 
 class TrackingRelatedTestCase(TestCase):
