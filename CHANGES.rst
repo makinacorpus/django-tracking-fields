@@ -2,10 +2,12 @@
 Changelog
 =========
 
-1.3.5 (unreleased)
+1.3.6 (unreleased)
 ------------------
 
-*
+* Fix error on admin related to filtering content from deleted user
+* Fix deprecation warnings for Django 5.0.
+* Django 3.2 and 4.0 compatibility
 
 1.3.5 (2022-03-09)
 ------------------
