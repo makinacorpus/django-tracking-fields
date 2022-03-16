@@ -2,7 +2,7 @@
 Changelog
 =========
 
-1.3.6 (unreleased)
+1.3.6 (2022-03-16)
 ------------------
 
 * Fix error on admin related to filtering content from deleted user
