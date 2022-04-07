@@ -5,7 +5,7 @@ Changelog
 1.3.7 (unreleased)
 ------------------
 
-*
+* Do not tracked deferred related fields.
 
 1.3.6 (2022-03-16)
 ------------------

@@ -47,12 +47,15 @@ def _set_original_fields(instance):
             original_fields[field] = None
         else:
             if isinstance(instance._meta.get_field(field), ForeignKey):
-                # Only get the PK, we don't want to get the object
-                # (which would make an additional request)
-                original_fields[field] = getattr(instance, "{0}_id".format(field))
+                # Do not store deferred fields
+                field_id = f"{field}_id"
+                if field_id not in instance.get_deferred_fields():
+                    # Only get the PK, we don't want to get the object
+                    # (which would make an additional request)
+                    original_fields[field] = getattr(instance, field_id)
             else:
                 # Do not store deferred fields
-                if field in instance.__dict__:
+                if field not in instance.get_deferred_fields():
                     original_fields[field] = getattr(instance, field)
 
     for field in getattr(instance, "_tracked_fields", []):
@@ -198,6 +201,8 @@ def _create_update_tracking_event(instance):
     tracked_fields = []
     for field in instance._tracked_fields:
         if not isinstance(instance._meta.get_field(field), ManyToManyField):
+            if field not in instance._original_fields:
+                continue
             try:
                 if isinstance(instance._meta.get_field(field), ForeignKey):
                     # Compare pk
@@ -221,6 +226,8 @@ def _create_update_tracking_related_event(instance):
     # Create a dict mapping related model field to modified fields
     for field, related_fields in instance._tracked_related_fields.items():
         if not isinstance(instance._meta.get_field(field), ManyToManyField):
+            if field not in instance._original_fields:
+                continue
             if isinstance(instance._meta.get_field(field), ForeignKey):
                 # Compare pk
                 value = getattr(instance, "{0}_id".format(field))

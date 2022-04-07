@@ -370,6 +370,30 @@ class TrackedFieldModificationTestCase(TestCase):
             assert field.new_value == json.dumps(self.pet.picture.path)
             self.pet.picture.delete()
 
+    def test_deferred_field(self):
+        pet = Pet.objects.only('id', 'name').get(pk=self.pet.pk)
+        pet.name = 'foo'
+        pet.age = 42
+        pet.save()
+        event = TrackingEvent.objects.order_by("date").last()
+        assert event.fields.all().count() == 1
+        field = event.fields.get(field="name")
+        assert field.old_value == json.dumps(str(self.pet.name))
+        assert field.new_value == json.dumps(str(pet.name))
+
+    def test_deferred_related_field(self):
+        self.human.favourite_pet = self.pet
+        self.human.save()
+        human = Human.objects.only('id', 'name').get(pk=self.human.pk)
+        human.favourite_pet = self.pet2
+        human.name = 'foo'
+        human.save()
+        event = TrackingEvent.objects.order_by("date").last()
+        assert event.fields.all().count() == 1
+        field = event.fields.get(field="name")
+        assert field.old_value == json.dumps(str(self.human.name))
+        assert field.new_value == json.dumps(str(human.name))
+
 
 class TrackingRelatedTestCase(TestCase):
     def setUp(self):
