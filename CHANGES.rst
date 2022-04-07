@@ -2,7 +2,7 @@
 Changelog
 =========
 
-1.3.7 (unreleased)
+1.3.7 (2022-04-07)
 ------------------
 
 * Do not tracked deferred related fields.
