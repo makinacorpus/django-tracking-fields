@@ -2,10 +2,11 @@
 Changelog
 =========
 
-1.3.8 (unreleased)
+1.4.0 (unreleased)
 ------------------
 
-*
+* Drop Django < 3.2 support
+* Add Django 4.2 support
 
 1.3.7 (2022-04-07)
 ------------------
