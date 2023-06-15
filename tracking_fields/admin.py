@@ -74,7 +74,7 @@ class TrackerEventUserFilter(admin.SimpleListFilter):
         users = qs.values(
             "user_content_type",
             "user_id",
-        )
+        ).order_by().distinct()
         lookups = {}
         for user in users:
             if user["user_content_type"] is None:

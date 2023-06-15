@@ -8,6 +8,7 @@ Changelog
 * Drop Django < 3.2 support
 * Add Django 4.2 support
 * Do not store M2M managers on the instance as original values.
+* Fix TrackerEventUserFilter performance.
 
 1.3.7 (2022-04-07)
 ------------------
