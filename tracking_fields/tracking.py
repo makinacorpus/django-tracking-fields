@@ -46,7 +46,10 @@ def _set_original_fields(instance):
         if instance.pk is None:
             original_fields[field] = None
         else:
-            if isinstance(instance._meta.get_field(field), ForeignKey):
+            if isinstance(instance._meta.get_field(field), ManyToManyField):
+                # Do not store M2M manager as we won't use them
+                return
+            elif isinstance(instance._meta.get_field(field), ForeignKey):
                 # Do not store deferred fields
                 field_id = f"{field}_id"
                 if field_id not in instance.get_deferred_fields():
