@@ -2,7 +2,7 @@
 Changelog
 =========
 
-1.4.0 (unreleased)
+1.4.0 (2023-06-15)
 ------------------
 
 * Drop Django < 3.2 support
