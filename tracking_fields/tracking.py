@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import datetime
 import json
 import logging
+import uuid
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
@@ -144,6 +145,8 @@ def _serialize_field(field):
         except ValueError:
             # No file
             return json.dumps(None, ensure_ascii=False)
+    if isinstance(field, uuid.UUID):
+        return json.dumps(str(field), ensure_ascii=False)
     if isinstance(field, Model):
         return json.dumps(str(field), ensure_ascii=False)
     if isinstance(field, StateWrapper):
