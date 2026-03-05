@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import datetime
 import json
 
-from cuser.middleware import CuserMiddleware
+from tracking_fields.middleware.cuser import CuserMiddleware
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.core.files import File
@@ -54,26 +54,6 @@ class TrackingEventTestCase(TestCase):
         assert human_event.object_repr == self.human_repr
         assert human_event.user == self.user
         assert human_event.user_repr == self.user_repr
-
-    def test_update_without_cuser(self):
-        """
-        Test the CREATE event without the cuser module
-        """
-        from tracking_fields import tracking
-
-        tracking.CUSER = False
-        self.human.age = 43
-        self.human.save()
-        events = TrackingEvent.objects.order_by("date").all()
-        assert events.count() == 3
-        human_event = events.last()
-        assert human_event.date is not None
-        assert human_event.action == UPDATE
-        assert human_event.object == self.human
-        assert human_event.object_repr == self.human_repr
-        assert human_event.user is None
-        assert human_event.user_repr == "None"
-        tracking.CUSER = True
 
     def test_update(self):
         """
