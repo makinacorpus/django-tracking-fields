@@ -3,7 +3,9 @@ from __future__ import unicode_literals
 import datetime
 import json
 import logging
+import uuid
 
+from tracking_fields.middleware.cuser import CuserMiddleware
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import ManyToManyField, Model
@@ -14,13 +16,6 @@ try:
     from xworkflows.base import StateWrapper
 except ImportError:
     StateWrapper = type("StateWrapper", (object,), dict())
-
-try:
-    from cuser.middleware import CuserMiddleware
-
-    CUSER = True
-except ImportError:
-    CUSER = False
 
 from tracking_fields.models import (
     CREATE,
@@ -116,13 +111,10 @@ def _create_event(instance, action):
     """
     Create a new event, getting the use if django-cuser is available.
     """
-    user = None
+    user = CuserMiddleware.get_user()
     user_repr = repr(user)
-    if CUSER:
-        user = CuserMiddleware.get_user()
-        user_repr = repr(user)
-        if user is not None and user.is_anonymous:
-            user = None
+    if user is not None and user.is_anonymous:
+        user = None
     return TrackingEvent.objects.create(
         action=action,
         object_content_type=ContentType.objects.get_for_model(instance),
@@ -144,6 +136,8 @@ def _serialize_field(field):
         except ValueError:
             # No file
             return json.dumps(None, ensure_ascii=False)
+    if isinstance(field, uuid.UUID):
+        return json.dumps(str(field), ensure_ascii=False)
     if isinstance(field, Model):
         return json.dumps(str(field), ensure_ascii=False)
     if isinstance(field, StateWrapper):
