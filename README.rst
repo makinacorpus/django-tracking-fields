@@ -14,8 +14,15 @@ A Django app allowing the tracking of objects field in the admin site.
 Requirements
 ------------
 
-* Django 2.2: See older versions for earlier version of Django.
-* django-cuser: Only if you want to track which user made the modifications.
+* Django 4.2: See older versions for earlier version of Django.
+* Add the middleware to also store the current user::
+
+    MIDDLEWARE = (
+        ...
+        "tracking_fields.middleware.cuser.CuserMiddleware",
+        ...
+    )
+
 
 Quick start
 -----------

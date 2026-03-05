@@ -2,10 +2,13 @@
 Changelog
 =========
 
-1.4.1 (unreleased)
+1.5.0 (2026-03-05)
 ------------------
 
-*
+* Drop Django support < 4.2
+* Add Django 6.0 support
+* Fix UUID serialization
+* Include cuse middleware inside tracking fields as it is no longer maintained
 
 1.4.0 (2023-06-15)
 ------------------
