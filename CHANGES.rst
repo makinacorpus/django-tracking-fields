@@ -5,7 +5,7 @@ Changelog
 1.5.2 (unreleased)
 ------------------
 
-*
+* Fix datetime.time serialization
 
 1.5.1 (2026-03-06)
 ------------------

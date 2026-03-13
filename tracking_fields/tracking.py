@@ -130,6 +130,8 @@ def _serialize_field(field):
         return json.dumps(field.strftime("%Y-%m-%d %H:%M:%S"), ensure_ascii=False)
     if isinstance(field, datetime.date):
         return json.dumps(field.strftime("%Y-%m-%d"), ensure_ascii=False)
+    if isinstance(field, datetime.time):
+        return json.dumps(field.strftime("%H-%M"), ensure_ascii=False)
     if isinstance(field, FieldFile):
         try:
             return json.dumps(field.path, ensure_ascii=False)
