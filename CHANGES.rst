@@ -2,7 +2,7 @@
 Changelog
 =========
 
-1.5.2 (unreleased)
+1.5.2 (2026-03-16)
 ------------------
 
 * Fix datetime.time serialization
